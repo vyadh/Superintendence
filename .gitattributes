@@ -2,6 +2,7 @@
 /gol.iml -text
 /gol.ipr -text
 src/org/softpres/life/Direction.java -text
+src/org/softpres/life/Grid.scala -text
 src/org/softpres/life/Individual.java -text
 src/org/softpres/life/JGrid.java -text
 src/org/softpres/life/Life.java -text
