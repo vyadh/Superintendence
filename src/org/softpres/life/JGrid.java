@@ -6,9 +6,10 @@ import java.util.ArrayList;
 public class JGrid {
 
   private final Individual[][] grid;
+  private final Direction[] directions = Direction.values();
 
-  public JGrid(List<Individual> individuals) {
-    grid = new Individual[Life.SIZE][Life.SIZE];
+  public JGrid(int size, List<Individual> individuals) {
+    grid = new Individual[size][size];
     initialiseGrid(individuals);
   }
 
@@ -26,7 +27,7 @@ public class JGrid {
 
   public Neighbourhood getNeighbourhood(Individual individual) {
     final List<Individual> neighbours = new ArrayList<Individual>(8);
-    for (final Direction direction : Direction.values()) {
+    for (final Direction direction : directions) {
       final Position position = direction.get(individual.getPosition());
       if (isInBounds(position)) {
         final Individual neighbour = get(position);
@@ -46,7 +47,11 @@ public class JGrid {
   }
 
   public Individual get(Position position) {
-    return grid[position.getX()-1][position.getY()-1];
+    return get(position.getX(), position.getY());
+  }
+
+  public Individual get(int x, int y) {
+    return grid[x-1][y-1];
   }
 
 }

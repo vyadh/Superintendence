@@ -5,7 +5,7 @@ package org.softpres.life
  *
  * @author kieron
  */
-class Grid(dimension: Int) {
+class Grid(val dimension: Int) {
 
   private var grid = new Array[Boolean](dimension * dimension)
   private var buffer = new Array[Boolean](dimension * dimension)
@@ -94,41 +94,6 @@ class Grid(dimension: Int) {
     } yield x + "," + y
 
     coords.sorted.mkString("(", "), (", ")")
-  }
-
-}
-
-object GridDemo {
-
-  def main(args: Array[String]): Unit = {
-    val grid = new Grid(10)
-    grid.activate(1, 2)
-    grid.activate(2, 3)
-    grid.activate(3, 1)
-    grid.activate(3, 2)
-    grid.activate(3, 3)
-
-//    for (_ <- 1 to 5) time(grid)
-    print(grid)
-  }
-
-  private def time(grid: Grid): Unit = {
-    val start = System.currentTimeMillis
-    var i = 1
-    while (i <= 1000000) {
-      grid.tick()
-      i += 1
-    }
-    val end = System.currentTimeMillis
-    System.out.println(end - start)
-  }
-
-  private def print(grid: Grid): Unit = {
-    System.out.println(grid)
-    for (_ <- 1 to 20) {
-      grid.tick()
-      println(grid.count + ": " + grid)
-    }
   }
 
 }

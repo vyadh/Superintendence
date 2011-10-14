@@ -30,6 +30,11 @@
   <component name="EntryPointsManager">
     <entry_points version="2.0" />
   </component>
+  <component name="ExportToHTMLSettings">
+    <option name="printScope" value="1" />
+    <option name="OPEN_IN_BROWSER" value="true" />
+    <option name="OUTPUT_DIRECTORY" value="C:\projects\gameoflife\exportToHTML" />
+  </component>
   <component name="HighlightingAdvisor">
     <option name="SUGGEST_TYPE_AWARE_HIGHLIGHTING" value="false" />
     <option name="TYPE_AWARE_HIGHLIGHTING_ENABLED" value="true" />
@@ -1800,7 +1805,7 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Gol.iml" filepath="$PROJECT_DIR$/Gol.iml" />
+      <module fileurl="file://$PROJECT_DIR$/gol.iml" filepath="$PROJECT_DIR$/gol.iml" />
     </modules>
   </component>
   <component name="ProjectResources">
@@ -1808,6 +1813,10 @@
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
+  </component>
+  <component name="ScalacSettings">
+    <option name="COMPILER_LIBRARY_NAME" value="scala-compiler-2.9.1" />
+    <option name="COMPILER_LIBRARY_LEVEL" value="Global" />
   </component>
   <component name="SvnBranchConfigurationManager">
     <option name="mySupportsUserInfoFilter" value="true" />

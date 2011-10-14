@@ -6,10 +6,12 @@ public class Position {
 
   private int x;
   private int y;
+  private final int scale;
 
-  public Position(int x, int y) {
+  public Position(int x, int y, int scale) {
     this.x = x;
     this.y = y;
+    this.scale = scale;
   }
 
   public int getX() {
@@ -20,13 +22,17 @@ public class Position {
     return y;
   }
 
+  public int getScale() {
+    return scale;
+  }
+
   public void draw(Graphics2D g) {
-    final int sx = Life.SCALE * x;
-    final int sy = Life.SCALE * y;
-    g.fillRect(sx + 1, sy + 1, Life.SCALE - 1, Life.SCALE - 1);
-    if (Life.SCALE > 1) {
+    final int sx = scale * x;
+    final int sy = scale * y;
+    g.fillRect(sx + 1, sy + 1, scale - 1, scale - 1);
+    if (scale > 1) {
       g.setColor(Color.BLACK);
-      g.drawRect(sx, sy, Life.SCALE, Life.SCALE);
+      g.drawRect(sx, sy, scale, scale);
     }
   }
 

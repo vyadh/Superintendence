@@ -13,3 +13,4 @@ src/org/softpres/life/Strategy.java -text
 src/org/softpres/life/World.java -text
 src/org/softpres/life/strategies/GameOfLifeAltStrategy.java -text
 src/org/softpres/life/strategies/GameOfLifeStrategy.java -text
+srctest/org/softpres/life/GridDemo.scala -text

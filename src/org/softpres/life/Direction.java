@@ -23,8 +23,10 @@ public enum Direction {
   }
 
   public Position get(Position position) {
-    return new Position(position.getX() + xOffset,
-          position.getY() + yOffset);
+    return new Position(
+          position.getX() + xOffset,
+          position.getY() + yOffset,
+          position.getScale());
   }
 
 }

@@ -9,6 +9,7 @@ public class Individual implements Strategy {
 
   private final Strategy strategy;
   private final Position position;
+  private final boolean ages;
   private int age;
   private int ticker;
   private int lastAliveTick = Integer.MAX_VALUE;
@@ -26,8 +27,13 @@ public class Individual implements Strategy {
   }
 
   public Individual(Strategy strategy, Position position) {
+    this(strategy, position, true);
+  }
+
+  public Individual(Strategy strategy, Position position, boolean ages) {
     this.strategy = strategy;
     this.position = position;
+    this.ages = ages;
   }
 
   public Position getPosition() {
@@ -50,11 +56,12 @@ public class Individual implements Strategy {
     final Color colour;
     if (isDead()) {
       colour = Color.DARK_GRAY;
-//    } else if (Math.abs(ticker - lastAliveTick) <= 1) {
-//      colour = OLD_AGE;
-    } else {
+    } else if (ages && Math.abs(ticker - lastAliveTick) <= 1) {
+      colour = OLD_AGE;
+    } else if (ages) {
       final int currentAge = Math.min(age, AGES.length - 1);
-//      colour = AGES[currentAge];
+      colour = AGES[currentAge];
+    } else {
       colour = Color.GREEN;
     }
     g.setColor(colour);

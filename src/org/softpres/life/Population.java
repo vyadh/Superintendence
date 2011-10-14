@@ -10,9 +10,9 @@ public class Population {
   private final JGrid grid;
   private final Random random;
 
-  public Population(List<Individual> individuals) {
+  public Population(int size, List<Individual> individuals) {
     this.individuals = individuals;
-    grid = new JGrid(individuals);
+    grid = new JGrid(size, individuals);
     random = new Random();
   }
 
