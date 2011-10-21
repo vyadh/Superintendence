@@ -12,11 +12,11 @@ import java.util.Random;
 
 public class Life {
 
-  public static final boolean BENCHMARK = true;
+  public static final boolean BENCHMARK = false;
 
-  private static final int DEFAULT_DIMENSION = 200;
-  private static final int DEFAULT_SCALE = 6; // 2+
-  private static final int DEFAULT_DELAY = 100;
+  private static final int DEFAULT_DIMENSION = 500;
+  private static final int DEFAULT_SCALE = 2; // 2+
+  private static final int DEFAULT_DELAY = 1000/60;
 
   private static final Random RANDOM = new Random();
 
@@ -30,11 +30,10 @@ public class Life {
   }
 
   private static void normal() {
-    final Population population = getInitialStateGlider(DEFAULT_DIMENSION);
-//    final Population population = getInitialStateRandom();
-//    final Population population = getInitialStateAll();
+//    final GridAPI grid = new OldGrid(DEFAULT_DIMENSION, DEFAULT_SCALE, population);
+    final GridAPI grid = new Grid(DEFAULT_DIMENSION);
+    final World world = new World(grid, DEFAULT_SCALE, DEFAULT_DELAY, DEFAULT_DIMENSION * DEFAULT_SCALE).start();
 
-    final World world = new World(population, DEFAULT_DELAY, DEFAULT_DIMENSION * DEFAULT_SCALE).start();
     final Life life = new Life();
     life.init(world, DEFAULT_SCALE);
   }
@@ -46,8 +45,12 @@ public class Life {
 
     System.out.println("Dimension (pixels): " + (dimension*scale));
 
-    final Population population = getBenchmarkPopulation(dimension);
-    final World world = new World(population, delay, dimension * scale);
+//    final GridAPI grid = new OldGrid(dimension, scale, population);
+    final GridAPI grid = new Grid(dimension);
+    final World world = new World(grid, scale, delay, dimension * scale);
+
+    randomise(grid, world, new Random(42));
+
     final Life life = new Life();
     life.createFrame(world);
 
@@ -56,9 +59,15 @@ public class Life {
 
   /**
    * Results. Format "e/t/r", where e=everything, t=ticks only, r=just repaint:
-   * 55/160/ 82 - volatile image
-   * 70/158/124 - buffered image
-   * 81/240/124 - added Direction#value() cache
+   *  55/  160/ 82 - volatile image
+   *  70/  158/124 - buffered image
+   *  81/  240/124 - added Direction#value() cache
+   *  33/  113/100 - using scala dirty-optimised grid
+   *  90/ 1350/100 - replaced for with while in Grid.mark()
+   * 200/ 1350/215 - removed needless cell border drawing operation
+   * 205/ 2070/220 - wasn't using optimised dirty-stepping!
+   * 211/ 2070/220 - change list, and dirty regions activated
+   * 890/62000/215 - drawing only change list!
    */
   private static void benchmark(final World world) {
     long ticks = 0;
@@ -71,8 +80,8 @@ public class Life {
         start = now;
         ticks = 0;
       }
-      world.getPopulation().tick(); // Disable to get 'r'
-      benchmarkRepaint(world);      // Disable to get 't'
+      world.getGrid().tick();  // Disable to get 'r'
+      benchmarkRepaint(world); // Disable to get 't'
       ticks++;
     }
   }
@@ -93,11 +102,11 @@ public class Life {
   }
 
   private void init(final World world, final int scale) {
-    final Population population = world.getPopulation();
+    final GridAPI grid = world.getGrid();
 
     world.addMouseListener(new MouseAdapter() {
       public void mousePressed(MouseEvent event) {
-        toggleIndividual(event.getX() / scale, event.getY() / scale, population);
+        toggleIndividual(event.getX() / scale, event.getY() / scale, grid);
         world.repaint();
       }
     });
@@ -108,7 +117,7 @@ public class Life {
         final int x = event.getX() / scale;
         final int y = event.getY() / scale;
         if (x != lastX || y != lastY) {
-          toggleIndividual(x, y, population);
+          toggleIndividual(x, y, grid);
           lastX = x;
           lastY = y;
           world.repaint();
@@ -124,17 +133,17 @@ public class Life {
             world.pause();
             break;
           case 'r':
-            randomise(population, world);
+            randomise(grid, world);
             break;
           case 'f':
-            fill(population, world);
+//            fill(grid, world);
             break;
           case 'c':
-            clear(population, world);
+//            clear(grid, world);
             break;
           case 's':
             world.tick();
-            System.out.println(population.alive() + ": " + population.debug());
+//            System.out.println(grid.alive() + ": " + grid.debug());
             break;
           case 'q':
             System.exit(0);
@@ -155,7 +164,10 @@ public class Life {
     final JFrame frame = new JFrame();
     frame.setLayout(new GridLayout(1, 1));
     frame.getContentPane().add(world);
-//    frame.setVisible(true);
+    if (BENCHMARK) {
+      frame.setLocation(2000, 1000); // Hidden!
+    }
+    frame.setVisible(true);
     frame.pack();
     frame.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent event) {
@@ -165,26 +177,36 @@ public class Life {
     return frame;
   }
 
-  private static void toggleIndividual(int x, int y, Population population) {
-    final Individual i = population.getGrid().get(new Position(x, y, DEFAULT_SCALE));
-    if (i.isDead()) {
-      i.revive();
+  private static void toggleIndividual(int x, int y, GridAPI grid) {
+    if (grid.cell(x, y)) {
+      grid.prime(x, y, false);
     } else {
-      i.die();
+      grid.prime(x, y, true);
     }
-    i.tick();
+    grid.tick();
   }
 
-  private static void randomise(Population population, World world) {
-    final List<Individual> individuals = population.getIndividuals();
-    for (final Individual individual : individuals) {
-      if (RANDOM.nextBoolean()) {
-        individual.die();
-      } else {
-        individual.revive();
+  private static void randomise(GridAPI grid, World world) {
+    for (int x=1; x<=grid.dimension(); x++) {
+      for (int y=1; y<=grid.dimension(); y++) {
+        final boolean alive = RANDOM.nextBoolean();
+        grid.prime(x, y, alive);
       }
-      individual.tick();
     }
+    grid.commit();
+    world.update();
+    world.repaint();
+  }
+
+  private static void randomise(GridAPI grid, World world, Random random) {
+    for (int x=1; x<=grid.dimension(); x++) {
+      for (int y=1; y<=grid.dimension(); y++) {
+        final boolean alive = random.nextBoolean();
+        grid.prime(x, y, alive);
+      }
+    }
+    grid.commit();
+    world.update();
     world.repaint();
   }
 
@@ -215,28 +237,6 @@ public class Life {
     grid.get(2, 3).revive().tick();
     grid.get(3, 3).revive().tick();
     return population;
-  }
-
-  private static Population getBenchmarkPopulation(int size) {
-    final List<Individual> individuals = new ArrayList<Individual>(size * size);
-    final Random random = new Random(42);
-    for (int x=1; x<=size; x++) {
-      for (int y=1; y<=size; y++) {
-        final Individual individual = new Individual(
-              new GameOfLifeStrategy(),
-              new Position(x, y, DEFAULT_SCALE),
-              false
-        );
-        if (random.nextBoolean()) {
-          individual.revive();
-        } else {
-          individual.die();
-        }
-        individual.tick();
-        individuals.add(individual);
-      }
-    }
-    return new Population(size, individuals);
   }
 
   private static Population getInitialStateAll(int size) {
