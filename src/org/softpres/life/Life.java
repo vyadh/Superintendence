@@ -17,9 +17,9 @@ public class Life {
   private static final Random RANDOM = new Random();
 
   private final World world;
-  private final GridAPI grid;
+  private final Grid grid;
 
-  public Life(World world, GridAPI grid) {
+  public Life(World world, Grid grid) {
     this.world = world;
     this.grid = grid;
   }
@@ -34,8 +34,8 @@ public class Life {
   }
 
   private static void normal() {
-//    final GridAPI grid = new OldGrid(DEFAULT_DIMENSION, DEFAULT_SCALE, population);
-    final GridAPI grid = new Grid(DEFAULT_DIMENSION);
+//    final Grid grid = new OldGrid(DEFAULT_DIMENSION, DEFAULT_SCALE, population);
+    final Grid grid = new Grid(DEFAULT_DIMENSION);
     final World world = new World(grid, DEFAULT_SCALE, DEFAULT_DELAY, DEFAULT_DIMENSION * DEFAULT_SCALE).start();
 
     final Life life = new Life(world, grid);
@@ -49,8 +49,8 @@ public class Life {
 
     System.out.println("Dimension (pixels): " + (dimension*scale));
 
-//    final GridAPI grid = new OldGrid(dimension, scale, population);
-    final GridAPI grid = new Grid(dimension);
+//    final Grid grid = new OldGrid(dimension, scale, population);
+    final Grid grid = new Grid(dimension);
     final World world = new World(grid, scale, delay, dimension * scale);
 
     final Life life = new Life(world, grid);

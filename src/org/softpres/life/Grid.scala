@@ -8,7 +8,7 @@ import java.awt.{Color, Graphics2D}
  *
  * @author kieron
  */
-class Grid(val dimension: Int) extends GridAPI {
+class Grid(val dimension: Int) {
 
   private var grid = new Array[Boolean](dimension * dimension)
   private var dirty = new Dirty

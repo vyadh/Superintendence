@@ -8,14 +8,14 @@ import java.awt.image.*;
 
 public class World extends JPanel {
 
-  private final GridAPI grid;
+  private final Grid grid;
   private final int scale;
   //  private final VolatileImage image;
   private final BufferedImage image;
   private final Timer timer;
   private boolean running = false;
 
-  public World(GridAPI grid, int scale, int delay, int dimensionPixels) {
+  public World(Grid grid, int scale, int delay, int dimensionPixels) {
     this.grid = grid;
     this.scale = scale;
 //    image = imageVolatile(dimensionPixels, dimensionPixels);
@@ -56,7 +56,7 @@ public class World extends JPanel {
     return gc.createCompatibleImage(width, height, Transparency.OPAQUE);
   }
 
-  public GridAPI getGrid() {
+  public Grid getGrid() {
     return grid;
   }
 
@@ -89,7 +89,7 @@ public class World extends JPanel {
     }
   }
 
-  private void draw(Graphics2D g, GridAPI grid) {
+  private void draw(Graphics2D g, Grid grid) {
     grid.draw(g, scale);
   }
 

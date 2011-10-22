@@ -1,18 +1,8 @@
 * text=auto !eol
 /gol.iml -text
 /gol.ipr -text
-src/org/softpres/life/Direction.java -text
 src/org/softpres/life/Grid.scala -text
-src/org/softpres/life/GridAPI.java -text
 src/org/softpres/life/Individual.java -text
-src/org/softpres/life/JGrid.java -text
 src/org/softpres/life/Life.java -text
-src/org/softpres/life/Neighbourhood.java -text
-src/org/softpres/life/OldGrid.java -text
-src/org/softpres/life/Population.java -text
-src/org/softpres/life/Position.java -text
-src/org/softpres/life/Strategy.java -text
 src/org/softpres/life/World.java -text
-src/org/softpres/life/strategies/GameOfLifeAltStrategy.java -text
-src/org/softpres/life/strategies/GameOfLifeStrategy.java -text
 srctest/org/softpres/life/GridDemo.scala -text

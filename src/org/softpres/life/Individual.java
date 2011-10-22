@@ -2,18 +2,20 @@ package org.softpres.life;
 
 import java.awt.*;
 
-public class Individual implements Strategy {
+/**
+ * todo This is just here to remind me of this neat feature
+ */
+public class Individual {
 
   private static final Color[] AGES = new Color[10];
   private static final Color OLD_AGE;
 
-  private final Strategy strategy;
-  private final Position position;
-  private final boolean ages;
+  private boolean ages;
   private int age;
   private int ticker;
   private int lastAliveTick = Integer.MAX_VALUE;
 
+  private boolean dead;
 
   static {
     Color c = Color.GREEN;
@@ -26,35 +28,9 @@ public class Individual implements Strategy {
     OLD_AGE = AGES[AGES.length - 1];
   }
 
-  public Individual(Strategy strategy, Position position) {
-    this(strategy, position, true);
-  }
-
-  public Individual(Strategy strategy, Position position, boolean ages) {
-    this.strategy = strategy;
-    this.position = position;
-    this.ages = ages;
-  }
-
-  public Position getPosition() {
-    return position;
-  }
-
-//  public void attack(Individual individual) {
-//    individual.attacked(this);
-//  }
-
-//  public void attacked(Individual individual) {
-//    strategy.attacked(individual);
-//  }
-
-  public boolean isDead() {
-    return strategy.isDead();
-  }
-
   public void draw(Graphics2D g) {
     final Color colour;
-    if (isDead()) {
+    if (dead) {
       colour = Color.DARK_GRAY;
     } else if (ages && Math.abs(ticker - lastAliveTick) <= 1) {
       colour = OLD_AGE;
@@ -65,26 +41,16 @@ public class Individual implements Strategy {
       colour = Color.GREEN;
     }
     g.setColor(colour);
-    position.draw(g);
+//    position.draw(g);
   }
 
-  public String toString() {
-    return strategy + ", " + position;
-  }
-
-  public Strategy revive() {
-    return strategy.revive();
-  }
-
-  public Strategy die() {
+  public void die() {
     age = 0;
-    return strategy.die();
   }
 
   public void tick() {
     ticker++;
-    strategy.tick();
-    if (strategy.isDead()) {
+    if (dead) {
       if (age != 0) {
         lastAliveTick = ticker;
       }
@@ -92,10 +58,6 @@ public class Individual implements Strategy {
     } else {
       age++;
     }
-  }
-
-  public void update(Neighbourhood neighbourhood) {
-    strategy.update(neighbourhood);
   }
 
 }
