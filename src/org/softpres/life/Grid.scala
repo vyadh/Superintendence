@@ -11,15 +11,11 @@ import java.awt.{Color, Graphics2D}
 class Grid(val dimension: Int) extends GridAPI {
 
   private var grid = new Array[Boolean](dimension * dimension)
-//  private var buffer = new Array[Boolean](dimension * dimension)
   private var dirty = new Dirty
   private var changes = new Changes
   private var painting: Array[(Int, Boolean)] = Array()
 
   final def commit() {
-//    val tmp = grid
-//    grid = buffer
-//    buffer = tmp
     val consumed = changes.consume()
     for ((index, alive) <- consumed) {
       grid(index) = alive
@@ -55,9 +51,6 @@ class Grid(val dimension: Int) extends GridAPI {
     val maxX = if (x == dimension) 0 else 1
     val maxY = if (y == dimension) 0 else 1
 
-//    for (xd <- minX to maxX; yd <- minY to maxY) {
-//      dirty += index(x+xd, y+yd)
-//    }
     var xd = minX
     while (xd <= maxX) {
       var yd = minY
@@ -117,6 +110,7 @@ class Grid(val dimension: Int) extends GridAPI {
 
       i += 1
     }
+    painting = Array()
   }
 
   private def draw() {
@@ -209,7 +203,7 @@ class Grid(val dimension: Int) extends GridAPI {
     def decode(value: Int) = if (value >= capacity) (value-capacity, true) else (value, false)
 
     def consume(): Array[(Int, Boolean)] = {
-      val res = changes.take(length+1).map(decode) //todo optimise?
+      val res = changes.take(length).map(decode) //todo optimise?
       length = 0
       res
     }
