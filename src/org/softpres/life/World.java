@@ -21,9 +21,19 @@ public class World extends JPanel {
 //    image = imageVolatile(dimensionPixels, dimensionPixels);
     image = imageBuffered(dimensionPixels, dimensionPixels);
     timer = new Timer(delay, new ActionListener() {
+      long start = System.currentTimeMillis();
+      long fps = 0;
       public void actionPerformed(ActionEvent event) {
         if (running) {
           tick();
+          fps++;
+          long end = System.currentTimeMillis();
+          long millis = end-start;
+          if (millis >= 1000) {
+//            System.out.println(fps + " / " + millis);
+            start = end;
+            fps = 0;
+          }
         }
       }
     });
@@ -71,27 +81,16 @@ public class World extends JPanel {
     }
   }
 
-  private void draw(Graphics2D g, GridAPI grid) {
-    grid.draw(g, scale);
-//    for (int x=1; x<=grid.dimension(); x++) {
-//      for (int y=1; y<=grid.dimension(); y++) {
-//        draw(g, x, y, grid.cell(x, y));
-//      }
-//    }
+  public void clear() {
+    if (image != null) {
+      final Graphics2D g = image.createGraphics();
+      g.setColor(Color.BLACK);
+      g.fillRect(0, 0, image.getWidth(), image.getHeight());
+    }
   }
 
-  private void draw(Graphics2D g, int x, int y, boolean alive) {
-    final Color colour;
-    if (alive) {
-      colour = Color.GREEN;
-    } else {
-      colour = Color.DARK_GRAY;
-    }
-    g.setColor(colour);
-
-    final int sx = scale * (x - 1);
-    final int sy = scale * (y - 1);
-    g.fillRect(sx + 1, sy + 1, scale - 1, scale - 1);
+  private void draw(Graphics2D g, GridAPI grid) {
+    grid.draw(g, scale);
   }
 
   protected void paintComponent(Graphics graphics) {
