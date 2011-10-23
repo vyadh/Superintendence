@@ -15,11 +15,11 @@ public class World extends JPanel {
   private final Timer timer;
   private boolean running = false;
 
-  public World(Grid grid, int scale, int delay, int dimensionPixels) {
+  public World(Grid grid, int scale, int delay, int dimensionPixelsX, int dimensionPixelsY) {
     this.grid = grid;
     this.scale = scale;
 //    image = imageVolatile(dimensionPixels, dimensionPixels);
-    image = imageBuffered(dimensionPixels, dimensionPixels);
+    image = imageBuffered(dimensionPixelsX, dimensionPixelsY);
     timer = new Timer(delay, new ActionListener() {
       long start = System.currentTimeMillis();
       long fps = 0;

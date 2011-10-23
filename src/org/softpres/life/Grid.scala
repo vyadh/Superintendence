@@ -6,11 +6,15 @@ import java.awt.{Color, Graphics2D}
  * Scala GOL grid, post optimisation.
  * todo boundary grid
  *
+ * MacBook:
+ * 22300
+ *
  * @author kieron
  */
-class Grid(val dimension: Int) {
+class Grid(val dimX: Int, val dimY: Int) {
 
-  private var grid = new Array[Boolean](dimension * dimension)
+  val cellCount = dimX * dimY
+  private var grid = new Array[Boolean](cellCount)
   private var dirty = new Dirty
   private var changes = new Changes
   private var painting: Array[(Int, Boolean)] = Array()
@@ -23,13 +27,13 @@ class Grid(val dimension: Int) {
     painting = consumed
   }
 
-  private def x(i: Int) = (i % dimension) + 1
-  private def y(i: Int) = (i / dimension) + 1
+  private def x(i: Int) = (i % dimX) + 1
+  private def y(i: Int) = (i / dimX) + 1
 
-  private def index(x: Int, y: Int) = (y - 1) * dimension + (x - 1)
+  private def index(x: Int, y: Int) = (y - 1) * dimX + (x - 1)
 
   final def cell(x: Int, y: Int): Boolean = {
-    if (x <= 0 || x > dimension || y <= 0 || y > dimension) {
+    if (x <= 0 || x > dimX || y <= 0 || y > dimY) {
       return false
     }
     return grid(index(x, y))
@@ -48,8 +52,8 @@ class Grid(val dimension: Int) {
   private def mark(x: Int, y: Int) {
     val minX = if (x == 1) 0 else -1
     val minY = if (y == 1) 0 else -1
-    val maxX = if (x == dimension) 0 else 1
-    val maxY = if (y == dimension) 0 else 1
+    val maxX = if (x == dimX) 0 else 1
+    val maxY = if (y == dimY) 0 else 1
 
     var xd = minX
     while (xd <= maxX) {
@@ -87,7 +91,7 @@ class Grid(val dimension: Int) {
 
   private def countAlive: Int = {
     var res = 0
-    for (x <- 1 to dimension; y <- 1 to dimension) {
+    for (x <- 1 to dimX; y <- 1 to dimY) {
       res += (if (cell(x, y)) 1 else 0)
     }
     res
@@ -115,9 +119,9 @@ class Grid(val dimension: Int) {
 
   private def draw() {
     var y = 1
-    while (y <= dimension) {
+    while (y <= dimY) {
       var x = 1
-      while (x <= dimension) {
+      while (x <= dimX) {
         val alive = cell(x, y)
         // Similate painting
         x += 1
@@ -174,7 +178,7 @@ class Grid(val dimension: Int) {
   }
 
   override def toString: String = {
-    val rows = grid.sliding(dimension, dimension)
+    val rows = grid.sliding(dimX, dimX)
     def cell(alive: Boolean) = if (alive) "X" else "O"
     val strs = rows.map(_.map(cell).mkString)
     val res = strs.mkString("\n")
@@ -190,8 +194,7 @@ class Grid(val dimension: Int) {
 //  }
 
   class Changes {
-    private val capacity = dimension * dimension
-    private val changes = new Array[Int](capacity)
+    private val changes = new Array[Int](cellCount)
     private var length = 0
 
     def +=(index: Int, alive: Boolean) {
@@ -199,8 +202,8 @@ class Grid(val dimension: Int) {
       length += 1
     }
 
-    def encode(index: Int, alive: Boolean) = if (alive) index+capacity else index
-    def decode(value: Int) = if (value >= capacity) (value-capacity, true) else (value, false)
+    def encode(index: Int, alive: Boolean) = if (alive) index+cellCount else index
+    def decode(value: Int) = if (value >= cellCount) (value-cellCount, true) else (value, false)
 
     def consume(): Array[(Int, Boolean)] = {
       val res = changes.take(length).map(decode) //todo optimise?
@@ -210,9 +213,8 @@ class Grid(val dimension: Int) {
   }
 
   class Dirty {
-    private val capacity = dimension * dimension
-    private var set = new Array[Boolean](capacity)
-    private val changes = new Array[Int](capacity)
+    private var set = new Array[Boolean](cellCount)
+    private val changes = new Array[Int](cellCount)
     private var length = 0
     def size = length
 
@@ -226,7 +228,7 @@ class Grid(val dimension: Int) {
 
     def consume(): Array[Int] = {
       val res = changes.take(length+1) //todo optimise?
-      set = new Array[Boolean](capacity)
+      set = new Array[Boolean](cellCount)
       length = 0
       res
     }

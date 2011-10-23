@@ -10,13 +10,16 @@ package org.softpres.life
  *   525/ 1330  replace mutable.Set dirty data structrure with dedicated
  * 26000/59100  only dirty regions evaluated!
  *
+ * Mac:
+ *    na/22000  mac continued from above
+ *
  * @author kieron
  */
 object GridDemo {
 
   def main(args: Array[String]): Unit = {
 //    val grid = new GridAll(10)
-    val grid = new Grid(100)
+    val grid = new Grid(100, 100)
     activatePseudoRandom(grid)
 //    activateGlider(grid)
     grid.commit()
@@ -41,8 +44,7 @@ object GridDemo {
 
   private def activatePseudoRandom(grid: Grid) {
     val random = new java.util.Random(42)
-    import grid.dimension
-    for (x <- 1 to dimension; y <- 1 to dimension) {
+    for (x <- 1 to grid.dimX; y <- 1 to grid.dimY) {
       if (random.nextBoolean) {
         grid.activate(x, y)
       }

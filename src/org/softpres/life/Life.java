@@ -10,9 +10,14 @@ public class Life {
 
   public static final boolean BENCHMARK = false;
 
-  private static final int DEFAULT_DIMENSION = 250;
-  private static final int DEFAULT_SCALE = 3; // 2+
-  private static final int DEFAULT_DELAY = 1000/60;
+  private static final int PIXELS_X = 1260;
+  private static final int PIXELS_Y = 750;
+  private static final int CELL_DIM = 2; // 2+
+  private static final int FPS = 60;
+
+  private static final int DEFAULT_DIMENSION_X = PIXELS_X/CELL_DIM;
+  private static final int DEFAULT_DIMENSION_Y = PIXELS_Y/CELL_DIM;
+  private static final int DEFAULT_DELAY = 1000/FPS;
 
   private static final Random RANDOM = new Random();
 
@@ -35,11 +40,17 @@ public class Life {
 
   private static void normal() {
 //    final Grid grid = new OldGrid(DEFAULT_DIMENSION, DEFAULT_SCALE, population);
-    final Grid grid = new Grid(DEFAULT_DIMENSION);
-    final World world = new World(grid, DEFAULT_SCALE, DEFAULT_DELAY, DEFAULT_DIMENSION * DEFAULT_SCALE).start();
+    final Grid grid = new Grid(DEFAULT_DIMENSION_X, DEFAULT_DIMENSION_Y);
+    final World world = new World(
+          grid,
+          CELL_DIM,
+          DEFAULT_DELAY,
+          DEFAULT_DIMENSION_X * CELL_DIM,
+          DEFAULT_DIMENSION_Y * CELL_DIM
+    ).start();
 
     final Life life = new Life(world, grid);
-    life.init(DEFAULT_SCALE);
+    life.init(CELL_DIM);
   }
 
   private static void benchmark() {
@@ -50,8 +61,8 @@ public class Life {
     System.out.println("Dimension (pixels): " + (dimension*scale));
 
 //    final Grid grid = new OldGrid(dimension, scale, population);
-    final Grid grid = new Grid(dimension);
-    final World world = new World(grid, scale, delay, dimension * scale);
+    final Grid grid = new Grid(dimension, dimension);
+    final World world = new World(grid, scale, delay, dimension * scale, dimension * scale);
 
     final Life life = new Life(world, grid);
     life.randomise(new Random(42));
@@ -62,15 +73,17 @@ public class Life {
 
   /**
    * Results. Format "e/t/r", where e=everything, t=ticks only, r=just repaint:
-   *  55/  160/ 82 - volatile image
-   *  70/  158/124 - buffered image
-   *  81/  240/124 - added Direction#value() cache
-   *  33/  113/100 - using scala dirty-optimised grid
-   *  90/ 1350/100 - replaced for with while in Grid.mark()
-   * 200/ 1350/215 - removed needless cell border drawing operation
-   * 205/ 2070/220 - wasn't using optimised dirty-stepping!
-   * 211/ 2070/220 - change list, and dirty regions activated
-   * 890/62000/215 - drawing only change list!
+   *   55/  160/  82 - volatile image
+   *   70/  158/ 124 - buffered image
+   *   81/  240/ 124 - added Direction#value() cache
+   *   33/  113/ 100 - using scala dirty-optimised grid
+   *   90/ 1350/ 100 - replaced for with while in Grid.mark()
+   *  200/ 1350/ 215 - removed needless cell border drawing operation
+   *  205/ 2070/ 220 - wasn't using optimised dirty-stepping!
+   *  211/ 2070/ 220 - change list, and dirty regions activated
+   *  890/62000/ 215 - drawing only change list!
+   *
+   * 2200/23000/3100 - mac continued from above
    */
   private static void benchmark(final World world) {
     long ticks = 0;
@@ -174,8 +187,8 @@ public class Life {
   }
 
   private void line() {
-    final int y = grid.dimension() / 2;
-    for (int x=1; x<=grid.dimension(); x++) {
+    final int y = grid.dimY() / 2;
+    for (int x=1; x<=grid.dimX(); x++) {
       grid.activate(x, y);
     }
 
@@ -185,8 +198,8 @@ public class Life {
   }
 
   private void acorn() {
-    final int x = grid.dimension() / 2;
-    final int y = grid.dimension() / 2;
+    final int x = grid.dimX() / 2;
+    final int y = grid.dimY() / 2;
 
     grid.activate(x + 3, y + 2);
     grid.activate(x + 2, y + 4);
@@ -214,8 +227,8 @@ public class Life {
   }
 
   private void randomise() {
-    for (int x=1; x<=grid.dimension(); x++) {
-      for (int y=1; y<=grid.dimension(); y++) {
+    for (int x=1; x<=grid.dimX(); x++) {
+      for (int y=1; y<=grid.dimY(); y++) {
         final boolean alive = RANDOM.nextBoolean();
         grid.prime(x, y, alive);
       }
@@ -226,8 +239,8 @@ public class Life {
   }
 
   private void randomise(Random random) {
-    for (int x=1; x<=grid.dimension(); x++) {
-      for (int y=1; y<=grid.dimension(); y++) {
+    for (int x=1; x<=grid.dimX(); x++) {
+      for (int y=1; y<=grid.dimY(); y++) {
         final boolean alive = random.nextBoolean();
         grid.prime(x, y, alive);
       }
@@ -238,8 +251,8 @@ public class Life {
   }
 
   private void clear() {
-    for (int x=1; x<=grid.dimension(); x++) {
-      for (int y=1; y<=grid.dimension(); y++) {
+    for (int x=1; x<=grid.dimX(); x++) {
+      for (int y=1; y<=grid.dimY(); y++) {
         grid.prime(x, y, false);
       }
     }
