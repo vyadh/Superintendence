@@ -12,6 +12,7 @@ package org.softpres.life
  *
  * Mac:
  *    na/22000  mac continued from above
+ *    na/24700  no changes?
  *
  * @author kieron
  */
@@ -33,14 +34,6 @@ object GridDemo {
     timePerSecond { grid.tick() }
 //    print(grid)
   }
-
-//  private def activateGlider(grid: GridAll) {
-//    grid.activate(1, 2)
-//    grid.activate(2, 3)
-//    grid.activate(3, 1)
-//    grid.activate(3, 2)
-//    grid.activate(3, 3)
-//  }
 
   private def activatePseudoRandom(grid: Grid) {
     val random = new java.util.Random(42)

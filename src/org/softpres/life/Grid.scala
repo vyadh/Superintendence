@@ -19,6 +19,12 @@ class Grid(val dimX: Int, val dimY: Int) {
   private var changes = new Changes
   private var painting: Array[(Int, Boolean)] = Array()
 
+
+  final def tick() {
+    step()
+    commit()
+  }
+
   final def commit() {
     val consumed = changes.consume()
     for ((index, alive) <- consumed) {
@@ -26,11 +32,6 @@ class Grid(val dimX: Int, val dimY: Int) {
     }
     painting = consumed
   }
-
-  private def x(i: Int) = (i % dimX) + 1
-  private def y(i: Int) = (i / dimX) + 1
-
-  private def index(x: Int, y: Int) = (y - 1) * dimX + (x - 1)
 
   final def cell(x: Int, y: Int): Boolean = {
     if (x <= 0 || x > dimX || y <= 0 || y > dimY) {
@@ -40,7 +41,6 @@ class Grid(val dimX: Int, val dimY: Int) {
   }
 
   final def prime(x: Int, y: Int, alive: Boolean) {
-//    buffer(index(x, y)) = alive
     changes += (index(x, y), alive)
     mark(x, y)
   }
@@ -48,6 +48,12 @@ class Grid(val dimX: Int, val dimY: Int) {
   final def activate(x: Int, y: Int) {
     prime(x, y, true)
   }
+
+
+  private def x(i: Int) = (i % dimX) + 1
+  private def y(i: Int) = (i / dimX) + 1
+
+  private def index(x: Int, y: Int) = (y - 1) * dimX + (x - 1)
 
   private def mark(x: Int, y: Int) {
     val minX = if (x == 1) 0 else -1
@@ -66,6 +72,21 @@ class Grid(val dimX: Int, val dimY: Int) {
     }
   }
 
+  private def step() {
+    val current = dirty.consume()
+
+    for (index <- current) {
+      val x = this.x(index)
+      val y = this.y(index)
+      val before = cell(x, y)
+      val n = neighbours(x, y)
+      val after = alive(before, n)
+      if (before != after) {
+        prime(x, y, after)
+      }
+    }
+  }
+
   private def neighbours(x: Int, y: Int): Int = {
     return neighbour(x, y, -1, -1) +
            neighbour(x, y, -1,  0) +
@@ -81,20 +102,15 @@ class Grid(val dimX: Int, val dimY: Int) {
     return if (cell(x + xd, y + yd)) 1 else 0
   }
 
-  final def tick() {
-    step()
-//    println(dirty.size);
-    commit()
-//    println(countAlive);
-//    draw()
-  }
-
-  private def countAlive: Int = {
-    var res = 0
-    for (x <- 1 to dimX; y <- 1 to dimY) {
-      res += (if (cell(x, y)) 1 else 0)
+  private def alive(alive: Boolean, neighbours: Int): Boolean = {
+    if (alive) {
+      if (neighbours <  2) return false
+      if (neighbours <= 3) return true
     }
-    res
+    else {
+      return neighbours == 3
+    }
+    return false
   }
 
   final def draw(g: Graphics2D, scale: Int) {
@@ -117,58 +133,6 @@ class Grid(val dimX: Int, val dimY: Int) {
     painting = Array()
   }
 
-  private def draw() {
-    var y = 1
-    while (y <= dimY) {
-      var x = 1
-      while (x <= dimX) {
-        val alive = cell(x, y)
-        // Similate painting
-        x += 1
-      }
-      y += 1
-    }
-  }
-
-  private def step() {
-    val current = dirty.consume()
-
-    for (index <- current) {
-      val x = this.x(index)
-      val y = this.y(index)
-      val before = cell(x, y)
-      val n = neighbours(x, y)
-      val after = alive(before, n)
-      if (before != after) {
-        prime(x, y, after)
-      }
-    }
-
-//    var y = 1
-//    while (y <= dimension) {
-//      var x = 1
-//      while (x <= dimension) {
-//        val before = cell(x, y)
-//        val n = neighbours(x, y)
-//        val after = alive(before, n)
-//        prime(x, y, after)
-//        x += 1
-//      }
-//      y += 1
-//    }
-  }
-
-  private def alive(alive: Boolean, neighbours: Int): Boolean = {
-    if (alive) {
-      if (neighbours <  2) return false
-      if (neighbours <= 3) return true
-    }
-    else {
-      return neighbours == 3
-    }
-    return false
-  }
-
   def count: Int = {
     var sum = 0
     for (cell <- grid) {
@@ -184,14 +148,6 @@ class Grid(val dimX: Int, val dimY: Int) {
     val res = strs.mkString("\n")
     res
   }
-
-//  class Change(val index: Int, val alive: Boolean) {
-//    override def hashCode = index + (if (alive) dimension*dimension else 0)
-//    override def equals(o: Any) = o match {
-//      case c: Change => index == c.index && alive == c.alive
-//      case _ => false
-//    }
-//  }
 
   class Changes {
     private val changes = new Array[Int](cellCount)
