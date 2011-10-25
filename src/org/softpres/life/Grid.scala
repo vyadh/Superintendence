@@ -80,13 +80,13 @@ class Grid(val dimX: Int, val dimY: Int) {
     val current = dirty.consume()
 
     for (index <- current) {
-      val x = this.x(index)
-      val y = this.y(index)
-      val before = cell(x, y)
-      val n = neighbours(x, y)
+      val xp = this.x(index)
+      val yp = this.y(index)
+      val before = cell(xp, yp)
+      val n = neighbours(xp, yp)
       val after = alive(before, n)
       if (before != after) {
-        prime(x, y, after)
+        prime(xp, yp, after)
       }
     }
   }
@@ -132,7 +132,7 @@ class Grid(val dimX: Int, val dimY: Int) {
       val sx = scale * (xp - 1)
       val sy = scale * (yp - 1)
 
-      g.fillRect(sx + 1, sy + 1, scale - 1, scale - 1)
+      g.fillRect(sx+1, sy+1, scale-1, scale-1)
 
       i += 1
     }
@@ -157,11 +157,11 @@ class Grid(val dimX: Int, val dimY: Int) {
 
   class Changes {
     private val changes = new Array[Int](cellCount)
-    private var length = 0
+    private var size = 0
 
     def +=(index: Int, alive: Boolean) {
-      changes(length) = encode(index, alive)
-      length += 1
+      changes(size) = encode(index, alive)
+      size += 1
     }
 
     def encode(index: Int, alive: Boolean) = if (alive) index+cellCount else index
@@ -170,8 +170,8 @@ class Grid(val dimX: Int, val dimY: Int) {
     def decodeAlive(value: Int) = value >= cellCount
 
     def consume(): Array[Int] = {
-      val res = changes.take(length)
-      length = 0
+      val res = changes.take(size)
+      size = 0
       res
     }
   }
@@ -179,23 +179,22 @@ class Grid(val dimX: Int, val dimY: Int) {
   class Dirty {
     private var set = new Array[Boolean](cellCount)
     private val changes = new Array[Int](cellCount)
-    private var length = 0
-    def size = length
+    private var size = 0
 
     def +=(index: Int) {
       if (!set(index)) {
         set(index) = true
-        changes(length) = index
-        length += 1
+        changes(size) = index
+        size += 1
       }
     }
 
     // todo replace with push/pop by adding "start" position?
 
     def consume(): Array[Int] = {
-      val res = changes.take(length+1) //todo optimise?
+      val res = changes.take(size+1) //todo optimise?
       set = new Array[Boolean](cellCount)
-      length = 0
+      size = 0
       res
     }
   }

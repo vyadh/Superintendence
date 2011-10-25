@@ -72,7 +72,7 @@ public class Life {
   }
 
   /**
-   * Results. Format "e/t/r", where e=everything, t=ticks only, r=just repaint:
+   * Results (server). Format "e/t/r", where e=everything, t=ticks only, r=just repaint:
    *   55/  160/  82 - volatile image
    *   70/  158/ 124 - buffered image
    *   81/  240/ 124 - added Direction#value() cache
@@ -82,8 +82,8 @@ public class Life {
    *  205/ 2070/ 220 - wasn't using optimised dirty-stepping!
    *  211/ 2070/ 220 - change list, and dirty regions activated
    *  890/62000/ 215 - drawing only change list!
-   *
-   * 2200/23000/3100 - mac continued from above
+   *  890/28300/2200 - fixed algorithm bug + small stuff (not sure why repaint has changed so much)
+   *  900/30500/2200 - avoid tuple creation, and subsequent boxing
    */
   private static void benchmark(final World world) {
     long ticks = 0;
@@ -227,15 +227,7 @@ public class Life {
   }
 
   private void randomise() {
-    for (int x=1; x<=grid.dimX(); x++) {
-      for (int y=1; y<=grid.dimY(); y++) {
-        final boolean alive = RANDOM.nextBoolean();
-        grid.prime(x, y, alive);
-      }
-    }
-    grid.commit();
-    world.update();
-    world.repaint();
+    randomise(RANDOM);
   }
 
   private void randomise(Random random) {

@@ -9,6 +9,9 @@ package org.softpres.life
  *   170/  360  add code to collate dirty regions
  *   525/ 1330  replace mutable.Set dirty data structrure with dedicated
  * 26000/59100  only dirty regions evaluated!
+ * 11400/27000  fixed algorithm bug
+ * 12300/27000  purge + non-square grid
+ * 16000/31000  avoid tuple creation, and subsequent boxing
  *
  * Mac:
  *    na/22000  mac continued from above
