@@ -2,8 +2,8 @@ window.onload = start
 
 var BENCH = false
 
-var dim = 40 // Cell Size
-var fps = 2
+var dim = 5 // Cell Size
+var fps = 30
 
 var c // Canvas
 var g // Graphics Context
@@ -60,8 +60,8 @@ function iOSgesture(event) { zoom(event.scale >= 1) }
 function iOSgestureEnd(event) { zooming = false }
 
 function reinit() {
-//  init(window.innerWidth, window.innerHeight)
-  init(120, 120)
+  init(window.innerWidth, window.innerHeight)
+//  init(120, 120)
 }
 
 function init(width, height) {
@@ -73,33 +73,25 @@ function init(width, height) {
   cellsX = Math.floor(w/dim)
   cellsY = Math.floor(h/dim)
 
-  gridInit()
+  grid = new Grid(cellsX, cellsY)
+
+  clear()
 
   // Create a random population
-//  visitAll(random)
-//  resolve()
-
-  arr = new Array
-  show(new Array(
-    new Array( true, false, false),
-    new Array( true, true,  false),
-    new Array( false, false, false)
-  ))
-
-  redraw()
-}
-
-function redraw() {
-  clear()
-  drawGrid()
+  showf(random)
+//  show([
+//    [ true,  false, false ],
+//    [ true,  false, false ],
+//    [ false, false, false ]
+//  ])
 }
 
 function random(x, y, alive) {
-  set(x, y, Math.random() >= 0.7)
+  return Math.random() >= 0.5
 }
 
 function drawGrid() {
-  visitRead(drawCell)
+  grid.draw(g, dim)
 }
 
 
@@ -110,7 +102,7 @@ function doKeyDown(event) {
     case 32: // Space
       toggle()
       break;
-    case 00: // todo 's'
+    case 83: // 's'
       tick()
       break
     case 189: // Minus
@@ -126,22 +118,34 @@ function doKeyDown(event) {
 //==-- Actions
 
 function show(array) {
-  for (var x=0; x<array.length; x++) {
-    var column = array[x];
-    for (var y=0; y<column.length; y++) {
-      var alive = column[y];
+  for (var x=1; x<=array.length; x++) {
+    var column = array[x-1];
+    for (var y=1; y<=column.length; y++) {
+      var alive = column[y-1];
       if (alive) {
-        set(x, y, alive)
+        grid.prime(x, y, alive)
       }
     }
   }
-  resolve()
+  grid.commit()
+  drawGrid()
+}
+
+function showf(f) {
+  for (var x=1; x<=cellsX; x++) {
+    for (var y=1; y<=cellsY; y++) {
+      var alive = f(x, y, grid.cell(x, y));
+      if (alive) {
+        grid.prime(x, y, alive)
+      }
+    }
+  }
+  grid.commit()
   drawGrid()
 }
 
 function tick() {
-  visitWrite(nextGeneration)
-  resolve()
+  grid.tick()
   drawGrid()
 }
 
@@ -177,144 +181,10 @@ function zoom(direction) {
 
 //==-- Painting
 
-function drawCell(x, y, alive) {
-  // Optimisation, don't draw when not required
-  if (peekChange(x, y, alive)) {
-    return
-  }
-
-  // Get pixel positions
-  var xp = x * dim
-  var yp = y * dim
-
-  g.fillStyle = colour(alive)
-  g.fillRect(xp+1, yp+1, dim-1, dim-1)
-}
-
-function colour(alive) {
-  if (alive) {
-    return "rgb( 0, 255,  0)"
-  } else {
-    return "rgb(64,  64, 64)"
-  }
-}
-
 function clear() {
-  g.fillStyle = "rgb(0,0,0)"
+  g.fillStyle = "rgb(0, 0, 0)"
   g.fillRect(0, 0, w, h)
 }
-
-
-//==-- Business Logic
-
-function nextGeneration(x, y, alive) {
-  var count = neighbours(x, y)
-  set(x, y, nextAlive(alive, count))
-}
-
-function neighbours(x, y) {
-  return neighbour(x-1, y-1) +
-         neighbour(x-1, y+0) +
-         neighbour(x-1, y+1) +
-         neighbour(x+0, y-1) +
-         neighbour(x+0, y+1) +
-         neighbour(x+1, y-1) +
-         neighbour(x+1, y+0) +
-         neighbour(x+1, y+1)
-}
-
-function neighbour(x, y) {
-  return (isAlive(x, y)) ? 1 : 0
-}
-
-function nextAlive(alive, neighbours) {
-  if (alive) {
-    if (neighbours <  2) return false
-    if (neighbours <= 3) return true
-  }
-  else {
-    return neighbours == 3
-  }
-  return false
-}
-
-function isAlive(x, y) {
-  if (x < 0 || x >= cellsX) return false
-  if (y < 0 || y >= cellsY) return false
-  return get(x, y)
-}
-
-
-//==-- Grid API
-
-function gridInit() {
-  grid = new Grid(cellsX, cellsY)
-}
-
-function get(x, y) {
-  return grid.cell(x, y)
-}
-
-function peekChange(x, y, alive) {
-  //return grid.prime(x, y, alive)
-}
-
-function set(x, y, alive) {
-  grid.prime(x, y, alive)
-}
-
-function visitAll(f) { visitAll_Live(f) }
-function visitRead(f) { visitRead_Live(f) }
-function visitWrite(f) { visitWrite_Live(f) }
-function resolve() { resolve_Live() }
-
-//==-- Grid (1D)
-
-function gridInit_1D() {
-  grid   = createGrid2D()
-  shadow = createGrid2D()
-}
-
-function createGrid_1D() {
-  var size = cellsX * cellsY
-  return new Array(size)
-}
-
-function get_1D(x, y) {
-  var index = y * cellsX + x
-  return grid[index]
-}
-
-function peek_1D(x, y) {
-  var index = y * cellsX + x
-  return shadow[index]
-}
-
-function set_1D(x, y, alive) {
-  var index = y * cellsX + x
-  shadow[index] = alive
-}
-
-function visitAll_1D(f) { visit_1D(f) }
-function visitRead_1D(f) { visit_1D(f) }
-function visitWrite_1D(f) { visit_1D(f) }
-
-function visit_1D(f) {
-  var size = cellsX * cellsY
-  for (var i=0; i<size; i++) {
-    var alive = grid[i]
-    var x = (i % cellsX)
-    var y = Math.floor(i / cellsX)
-    f(x, y, alive)
-  }
-}
-
-function resolve_1D() {
-  var tmp = grid
-  grid = shadow
-  shadow = tmp
-}
-
 
 
 //todo optimisations:
@@ -326,40 +196,18 @@ function resolve_1D() {
 function canvas()  { return document.getElementById('life') }
 function context() { return canvas().getContext('2d') }
 
-function TreeSet() {
-  this.items = new Array
-  this.keys = new Array
 
-  this.clear = function() {
-    items.length = 0
-    keys.length = 0
-  }
-
-  this.add = function(item) {
-    if (!this.contains(item)) {
-      this.items.push(item)
-      this.keys[item] = true
-    }
-  }
-
-  this.contains = function(item) {
-    return this.keys[item] == true
-  }
-
-  this.size = function() {
-    return this.items.length
-  }
-}
-
-
-//==-- Benchmark
+//==-- Benchmark (Beefy)
+// 4880: Original
+// 4395: Optimised
 
 function benchmark(iterations, f) {
   var i = iterations
 
   var start = new Date
-  while (i--) {
+  while (i > 0) {
     f()
+    i--
   }
   var end = new Date
 

@@ -9,24 +9,24 @@
  */
 function Grid(dimX, dimY) {
 
-  this.dimX = dimX
-  this.dimY = dimY
   var cellCount = dimX * dimY
-  this.grid = new Array(cellCount)
-  this.dirty = new Dirty
-  this.changes = new Changes
-  this.painting = Array()
+  var grid = newArray(cellCount, false)
+  var dirty = new Dirty
+  var changes = new Changes
+  var painting = Array()
 
 
   this.tick = function() {
-    step()
-    commit()
+    this.step()
+    this.commit()
   }
 
   this.commit = function() {
     var consumed = changes.consume()
-    for (index in consumed) {
-      var alive = consumed[index]
+    for (var i=0; i<consumed.length; i++) {
+      var encoded = consumed[i]
+      var index = changes.decodeIndex(encoded)
+      var alive = changes.decodeAlive(encoded)
       grid[index] = alive
     }
     painting = consumed
@@ -40,7 +40,7 @@ function Grid(dimX, dimY) {
   }
 
   this.prime = function(x, y, alive) {
-    this.changes.add(this.index(x, y), alive)
+    changes.add(index(x, y), alive)
     mark(x, y)
   }
 
@@ -49,12 +49,12 @@ function Grid(dimX, dimY) {
   }
 
 
-  this.x = function(i) { return (i % dimX) + 1 }
-  this.y = function(i) { return (i / dimX) + 1 }
+  function x(i) { return (i % dimX) + 1 }
+  function y(i) { return Math.floor(i / dimX) + 1 }
 
-  this.index = function(x, y) { return (y - 1) * dimX + (x - 1) }
+  function index(x, y) { return (y - 1) * dimX + (x - 1) }
 
-  this.mark = function(x, y) {
+  var mark = function(x, y) {
     var minX = (x == 1) ? 0 : -1
     var minY = (y == 1) ? 0 : -1
     var maxX = (x == dimX) ? 0 : 1
@@ -72,30 +72,30 @@ function Grid(dimX, dimY) {
 
     for (var i = 0; i < current.length; i++) {
       var index = current[i]
-      var x = this.x(index)
-      var y = this.y(index)
-      var before = cell(x, y)
-      var n = neighbours(x, y)
-      var after = alive(before, n)
+      var xp = x(index)
+      var yp = y(index)
+      var before = this.cell(xp, yp)
+      var n = this.neighbours(xp, yp)
+      var after = this.alive(before, n)
       if (before != after) {
-        prime(x, y, after)
+        this.prime(xp, yp, after)
       }
     }
   }
 
   this.neighbours = function(x, y) {
-    return neighbour(x, y, -1, -1) +
-           neighbour(x, y, -1,  0) +
-           neighbour(x, y, -1,  1) +
-           neighbour(x, y,  0, -1) +
-           neighbour(x, y,  0,  1) +
-           neighbour(x, y,  1, -1) +
-           neighbour(x, y,  1,  0) +
-           neighbour(x, y,  1,  1)
+    return this.neighbour(x, y, -1, -1) +
+           this.neighbour(x, y, -1,  0) +
+           this.neighbour(x, y, -1,  1) +
+           this.neighbour(x, y,  0, -1) +
+           this.neighbour(x, y,  0,  1) +
+           this.neighbour(x, y,  1, -1) +
+           this.neighbour(x, y,  1,  0) +
+           this.neighbour(x, y,  1,  1)
   }
 
   this.neighbour = function(x, y, xd, yd) {
-    return (cell(x + xd, y + yd)) ? 1 : 0
+    return (this.cell(x + xd, y + yd)) ? 1 : 0
   }
 
   this.alive = function(alive, neighbours) {
@@ -115,22 +115,22 @@ function Grid(dimX, dimY) {
       var index = changes.decodeIndex(encoded)
       var alive = changes.decodeAlive(encoded)
 
-      var colour = alive ? Color.GREEN : Color.DARK_GRAY
-      g.setColor(colour)
+      var colour = alive ? "rgb( 0, 255,  0)" : "rgb(64,  64, 64)"
+      g.fillStyle = colour
 
       var xp = x(index)
       var yp = y(index)
       var sx = scale * (xp - 1)
       var sy = scale * (yp - 1)
 
-      g.fillRect(sx + 1, sy + 1, scale - 1, scale - 1)
+      g.fillRect(sx+1, sy+1, scale-1, scale-1)
     }
     painting = new Array()
   }
 
   this.count = function() {
     var sum = 0
-    for (cell in grid) {
+    for (var cell in grid) {
       sum += (cell ? 1 : 0)
     }
     return sum
@@ -146,45 +146,52 @@ function Grid(dimX, dimY) {
 */
   function Changes() {
     var changes = new Array(cellCount)
-    var length = 0
+    var size = 0
 
-    function add(index, alive) {
-      changes(length) = encode(index, alive)
-      length += 1
+    this.add = function(index, alive) {
+      changes[size] = encode(index, alive)
+      size += 1
     }
 
-    function encode(index, alive) { return (alive) ? index+cellCount : index }
+    function encode(index, alive) { return alive ? index+cellCount : index }
 
-    function decodeIndex(value) { return (value >= cellCount) ? value-cellCount : value }
-    function decodeAlive(value) { return value >= cellCount }
+    this.decodeIndex = function(value) { return (value >= cellCount) ? value-cellCount : value }
+    this.decodeAlive = function(value) { return value >= cellCount }
 
-    function consume() {
-      var res = changes.take(length).map(decode) //todo optimise?
-      length = 0
+    this.consume = function() {
+      var res = changes.slice(0, size)
+      size = 0
       return res
     }
   }
 
   function Dirty() {
-    var set = new Array(cellCount)
+    var setView = new Array(cellCount)
     var changes = new Array(cellCount)
-    var length = 0
-    function size() { return length }
+    var size = 0
 
-    function add(index) {
-      if (!set(index)) {
-        set(index) = true
-        changes(length) = index
-        length += 1
+    this.add = function(index) {
+      if (!setView[index]) {
+        setView[index] = true
+        changes[size] = index
+        size += 1
       }
     }
 
-    function consume() {
-      var res = changes.take(length+1) //todo optimise?
-      set = new Array[Boolean](cellCount)
-      length = 0
+    this.consume = function() {
+      var res = changes.slice(0, size)
+      setView = new Array(cellCount)
+      size = 0
       return res
     }
+  }
+
+  function newArray(size, value) {
+    var res = new Array(size)
+    for (var i=0; i<size; i++) {
+      res[i] = value
+    }
+    return res
   }
 
 }
