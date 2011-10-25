@@ -8,6 +8,8 @@ import java.awt.{Color, Graphics2D}
  *
  * MacBook:
  * 22300
+ * 24300 - no change, afaik
+ * 27000 - removed tuples for changes
  *
  * @author kieron
  */
@@ -17,7 +19,7 @@ class Grid(val dimX: Int, val dimY: Int) {
   private var grid = new Array[Boolean](cellCount)
   private var dirty = new Dirty
   private var changes = new Changes
-  private var painting: Array[(Int, Boolean)] = Array()
+  private var painting: Array[Int] = Array()
 
 
   final def tick() {
@@ -27,7 +29,9 @@ class Grid(val dimX: Int, val dimY: Int) {
 
   final def commit() {
     val consumed = changes.consume()
-    for ((index, alive) <- consumed) {
+    for (encoded <- consumed) {
+      val index = changes.decodeIndex(encoded)
+      val alive = changes.decodeAlive(encoded)
       grid(index) = alive
     }
     painting = consumed
@@ -116,7 +120,9 @@ class Grid(val dimX: Int, val dimY: Int) {
   final def draw(g: Graphics2D, scale: Int) {
     var i = 0
     while (i < painting.length) {
-      val (index, alive) = painting(i)
+      val encoded = painting(i)
+      val index = changes.decodeIndex(encoded)
+      val alive = changes.decodeAlive(encoded)
 
       val colour = if (alive) Color.GREEN else Color.DARK_GRAY
       g.setColor(colour)
@@ -159,10 +165,12 @@ class Grid(val dimX: Int, val dimY: Int) {
     }
 
     def encode(index: Int, alive: Boolean) = if (alive) index+cellCount else index
-    def decode(value: Int) = if (value >= cellCount) (value-cellCount, true) else (value, false)
 
-    def consume(): Array[(Int, Boolean)] = {
-      val res = changes.take(length).map(decode) //todo optimise?
+    def decodeIndex(value: Int) = if (value >= cellCount) value-cellCount else value
+    def decodeAlive(value: Int) = value >= cellCount
+
+    def consume(): Array[Int] = {
+      val res = changes.take(length)
       length = 0
       res
     }
@@ -181,6 +189,8 @@ class Grid(val dimX: Int, val dimY: Int) {
         length += 1
       }
     }
+
+    // todo replace with push/pop by adding "start" position?
 
     def consume(): Array[Int] = {
       val res = changes.take(length+1) //todo optimise?
