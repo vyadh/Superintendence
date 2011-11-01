@@ -55,7 +55,7 @@ public class Life {
 
   private static void benchmark() {
     final int scale = 4;
-    final int dimension = 100;
+    final int dimension = 500;
     final int delay = 0;
 
     System.out.println("Dimension (pixels): " + (dimension*scale));
@@ -84,6 +84,9 @@ public class Life {
    *  890/62000/ 215 - drawing only change list!
    *  890/28300/2200 - fixed algorithm bug + small stuff (not sure why repaint has changed so much)
    *  900/30500/2200 - avoid tuple creation, and subsequent boxing
+   *   58/ 1100/ 157 - adjusted benchmark grid size to 500x500
+   *   59/ 1850/ 157 - while loops, buffered array use
+   *  151/ 1820/ 157 - volatile image
    */
   private static void benchmark(final World world) {
     long ticks = 0;

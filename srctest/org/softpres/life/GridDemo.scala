@@ -12,6 +12,10 @@ package org.softpres.life
  * 11400/27000  fixed algorithm bug
  * 12300/27000  purge + non-square grid
  * 16000/31000  avoid tuple creation, and subsequent boxing
+ * 18000/37500  while loops
+ * 19000/38300  final classes
+ * 21700/48400  buffered array (dirty)
+ * 22800/52000  buffered array (changes)
  *
  * Mac:
  *    na/22000  mac continued from above

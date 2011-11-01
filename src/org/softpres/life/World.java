@@ -10,16 +10,17 @@ public class World extends JPanel {
 
   private final Grid grid;
   private final int scale;
-  //  private final VolatileImage image;
-  private final BufferedImage image;
+    private final VolatileImage image;
+//  private final BufferedImage image;
   private final Timer timer;
   private boolean running = false;
 
   public World(Grid grid, int scale, int delay, int dimensionPixelsX, int dimensionPixelsY) {
     this.grid = grid;
     this.scale = scale;
-//    image = imageVolatile(dimensionPixels, dimensionPixels);
-    image = imageBuffered(dimensionPixelsX, dimensionPixelsY);
+    image = imageVolatile(dimensionPixelsX, dimensionPixelsY);
+//    image = imageBuffered(dimensionPixelsX, dimensionPixelsY);
+
     timer = new Timer(delay, new ActionListener() {
       long start = System.currentTimeMillis();
       long fps = 0;
@@ -44,13 +45,19 @@ public class World extends JPanel {
     return this;
   }
 
-  private VolatileImage imageVolatile(int width, int height) {
+  private static VolatileImage imageVolatile(int width, int height) {
     final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     final GraphicsConfiguration gc = ge.getDefaultScreenDevice().getDefaultConfiguration();
-    return gc.createCompatibleVolatileImage(width, height, Transparency.OPAQUE);
+    final VolatileImage image = gc.createCompatibleVolatileImage(width, height, Transparency.OPAQUE);
+
+    final Graphics g = image.getGraphics();
+    g.setColor(Color.BLACK);
+    g.fillRect(0, 0, width, height);
+
+    return image;
   }
 
-  private BufferedImage imageBuffered(int width, int height) {
+  private static BufferedImage imageBuffered(int width, int height) {
     final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     final GraphicsConfiguration gc = ge.getDefaultScreenDevice().getDefaultConfiguration();
     return gc.createCompatibleImage(width, height, Transparency.OPAQUE);

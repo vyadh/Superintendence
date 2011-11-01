@@ -13,43 +13,46 @@ import java.awt.{Color, Graphics2D}
  *
  * @author kieron
  */
-class Grid(val dimX: Int, val dimY: Int) {
+final class Grid(val dimX: Int, val dimY: Int) {
 
   val cellCount = dimX * dimY
   private var grid = new Array[Boolean](cellCount)
   private var dirty = new Dirty
   private var changes = new Changes
-  private var painting: Array[Int] = Array()
+  private var painting: BufferedIntArray = new BufferedIntArray(0)
 
 
-  final def tick() {
+  def tick() {
     step()
     commit()
   }
 
-  final def commit() {
+  def commit() {
     val consumed = changes.consume()
-    for (encoded <- consumed) {
+    var i = 0
+    while (i < consumed.length) {
+      val encoded = consumed(i)
       val index = changes.decodeIndex(encoded)
       val alive = changes.decodeAlive(encoded)
       grid(index) = alive
+      i += 1
     }
     painting = consumed
   }
 
-  final def cell(x: Int, y: Int): Boolean = {
+  def cell(x: Int, y: Int): Boolean = {
     if (x <= 0 || x > dimX || y <= 0 || y > dimY) {
       return false
     }
     return grid(index(x, y))
   }
 
-  final def prime(x: Int, y: Int, alive: Boolean) {
+  def prime(x: Int, y: Int, alive: Boolean) {
     changes += (index(x, y), alive)
     mark(x, y)
   }
 
-  final def activate(x: Int, y: Int) {
+  def activate(x: Int, y: Int) {
     prime(x, y, true)
   }
 
@@ -79,7 +82,9 @@ class Grid(val dimX: Int, val dimY: Int) {
   private def step() {
     val current = dirty.consume()
 
-    for (index <- current) {
+    var i = 0
+    while (i < current.length) {
+      val index = current(i)
       val xp = this.x(index)
       val yp = this.y(index)
       val before = cell(xp, yp)
@@ -88,6 +93,7 @@ class Grid(val dimX: Int, val dimY: Int) {
       if (before != after) {
         prime(xp, yp, after)
       }
+      i += 1
     }
   }
 
@@ -117,7 +123,7 @@ class Grid(val dimX: Int, val dimY: Int) {
     return false
   }
 
-  final def draw(g: Graphics2D, scale: Int) {
+  def draw(g: Graphics2D, scale: Int) {
     var i = 0
     while (i < painting.length) {
       val encoded = painting(i)
@@ -136,7 +142,7 @@ class Grid(val dimX: Int, val dimY: Int) {
 
       i += 1
     }
-    painting = Array()
+    painting = new BufferedIntArray(0)
   }
 
   def count: Int = {
@@ -155,8 +161,8 @@ class Grid(val dimX: Int, val dimY: Int) {
     res
   }
 
-  class Changes {
-    private val changes = new Array[Int](cellCount)
+  final class Changes {
+    private val changes = new BufferedIntArray(cellCount)
     private var size = 0
 
     def +=(index: Int, alive: Boolean) {
@@ -169,33 +175,52 @@ class Grid(val dimX: Int, val dimY: Int) {
     def decodeIndex(value: Int) = if (value >= cellCount) value-cellCount else value
     def decodeAlive(value: Int) = value >= cellCount
 
-    def consume(): Array[Int] = {
+    def consume(): BufferedIntArray = {
       val res = changes.take(size)
       size = 0
       res
     }
   }
 
-  class Dirty {
+  final class Dirty {
     private var set = new Array[Boolean](cellCount)
-    private val changes = new Array[Int](cellCount)
+    private var dirty = new BufferedIntArray(cellCount)
     private var size = 0
 
     def +=(index: Int) {
       if (!set(index)) {
         set(index) = true
-        changes(size) = index
+        dirty(size) = index
         size += 1
       }
     }
 
-    // todo replace with push/pop by adding "start" position?
-
-    def consume(): Array[Int] = {
-      val res = changes.take(size+1) //todo optimise?
+    def consume(): BufferedIntArray = {
       set = new Array[Boolean](cellCount)
+      val res = dirty.take(size)
       size = 0
       res
+    }
+  }
+
+  /** Array that uses a buffer in order to expose a view of the last changes. Used to avoid
+   * re-creation of arrays. */
+  final class BufferedIntArray(
+        val length: Int,
+        private var array: Array[Int],
+        private var buffer: Array[Int]) {
+
+    def this(length: Int) = this(length, new Array[Int](length), new Array[Int](length))
+
+    def apply(i: Int) = array(i)
+    def update(i: Int, value: Int) { buffer(i) = value }
+
+    /** Switch array and buffer and return view. */
+    def take(size: Int) = {
+      var t = array
+      array = buffer
+      buffer = t
+      new BufferedIntArray(size, array, buffer)
     }
   }
 
