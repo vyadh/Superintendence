@@ -24,7 +24,7 @@ function Grid(dimX, dimY) {
   this.commit = function() {
     var consumed = changes.consume()
     for (var i=0; i<consumed.length; i++) {
-      var encoded = consumed[i]
+      var encoded = consumed.apply[i]
       var index = changes.decodeIndex(encoded)
       var alive = changes.decodeAlive(encoded)
       grid[index] = alive
@@ -55,10 +55,10 @@ function Grid(dimX, dimY) {
   function index(x, y) { return (y - 1) * dimX + (x - 1) }
 
   var mark = function(x, y) {
-    var minX = (x == 1) ? 0 : -1
-    var minY = (y == 1) ? 0 : -1
-    var maxX = (x == dimX) ? 0 : 1
-    var maxY = (y == dimY) ? 0 : 1
+    var minX = (x === 1) ? 0 : -1
+    var minY = (y === 1) ? 0 : -1
+    var maxX = (x === dimX) ? 0 : 1
+    var maxY = (y === dimY) ? 0 : 1
 
     for (var xd = minX; xd <= maxX; xd++) {
       for (var yd = minY; yd <= maxY; yd++) {
@@ -71,13 +71,13 @@ function Grid(dimX, dimY) {
     var current = dirty.consume()
 
     for (var i = 0; i < current.length; i++) {
-      var index = current[i]
+      var index = current.apply[i]
       var xp = x(index)
       var yp = y(index)
       var before = this.cell(xp, yp)
       var n = this.neighbours(xp, yp)
       var after = this.alive(before, n)
-      if (before != after) {
+      if (before !== after) {
         this.prime(xp, yp, after)
       }
     }
@@ -104,14 +104,14 @@ function Grid(dimX, dimY) {
       if (neighbours <= 3) return true
     }
     else {
-      return neighbours == 3
+      return neighbours === 3
     }
     return false
   }
 
   this.draw = function(g, scale) {
     for (var i = 0; i < painting.length; i++) {
-      var encoded = painting[i]
+      var encoded = painting.apply[i]
       var index = changes.decodeIndex(encoded)
       var alive = changes.decodeAlive(encoded)
 
@@ -145,11 +145,11 @@ function Grid(dimX, dimY) {
   }
 */
   function Changes() {
-    var changes = new Array(cellCount)
+    var changes = newBufferedArray(cellCount)
     var size = 0
 
     this.add = function(index, alive) {
-      changes[size] = encode(index, alive)
+      changes.update[size] = encode(index, alive)
       size += 1
     }
 
@@ -159,7 +159,7 @@ function Grid(dimX, dimY) {
     this.decodeAlive = function(value) { return value >= cellCount }
 
     this.consume = function() {
-      var res = changes.slice(0, size)
+      var res = changes.take(size)
       size = 0
       return res
     }
@@ -167,22 +167,39 @@ function Grid(dimX, dimY) {
 
   function Dirty() {
     var setView = new Array(cellCount)
-    var changes = new Array(cellCount)
+    var dirty = newBufferedArray(cellCount)
     var size = 0
 
     this.add = function(index) {
       if (!setView[index]) {
         setView[index] = true
-        changes[size] = index
+        dirty.update[size] = index
         size += 1
       }
     }
 
     this.consume = function() {
-      var res = changes.slice(0, size)
       setView = new Array(cellCount)
+      var res = dirty.take(size)
       size = 0
       return res
+    }
+  }
+
+  function newBufferedArray(length) {
+    return new BufferedArray(length, new Array(length), new Array(length))
+  }
+
+  function BufferedArray(length, array, buffer) {
+    this.apply = array
+    this.update = buffer
+    this.length = length
+
+    this.take = function(size) {
+      var t = this.apply
+      this.apply = this.update
+      this.update = t
+      return new BufferedArray(size, this.apply, this.update)
     }
   }
 

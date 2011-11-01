@@ -1,6 +1,6 @@
 window.onload = start
 
-var BENCH = false
+var BENCH = true
 
 var dim = 5 // Cell Size
 var fps = 30
@@ -28,14 +28,14 @@ function start() {
 
 function startBenchmark() {
   // Beefy PC
-//  dim = 2
-//  init(500, 400)
-//  benchmark(200, tick)
+  dim = 2
+  init(500, 400)
+  benchmark(200, tick)
 
   // MacBook
-  dim = 3
-  init(500, 400)
-  benchmark(225, tick)
+//  dim = 3
+//  init(500, 400)
+//  benchmark(225, tick)
 }
 
 function startNormal() {
@@ -200,6 +200,7 @@ function context() { return canvas().getContext('2d') }
 //==-- Benchmark (Beefy)
 // 4880: Original
 // 4395: Optimised
+// 4305: Changed slice to use buffered array (very little benefit in JS)
 
 function benchmark(iterations, f) {
   var i = iterations
