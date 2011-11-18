@@ -15,6 +15,7 @@ class Gestures(c: Component, listener: Gestures.Gesture => Unit = _ => ()) {
 
   val granularity = 50 // ms
   var last: Position = null
+  var vectors = new ArrayBuffer[Vector](100)
 
 
   def start() {
@@ -40,10 +41,10 @@ class Gestures(c: Component, listener: Gestures.Gesture => Unit = _ => ()) {
 
   def gestureMove(x: Int, y: Int) {
     val time = now
-    if ((now - last.time) > granularity) {
-      val position = Position(time, x, y)
-      emit(Vector(last, position))
-      last = position
+    if ((time - last.time) > granularity) {
+      val pos = Position(time, x, y)
+      emit(Vector(last, pos))
+      last = pos
     }
   }
 
@@ -57,7 +58,6 @@ class Gestures(c: Component, listener: Gestures.Gesture => Unit = _ => ()) {
     listener(recognise(path))
   }
 
-  var vectors = new ArrayBuffer[Vector](100)
   def emit(vector: Vector) {
     vectors += vector
 

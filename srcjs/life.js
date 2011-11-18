@@ -1,6 +1,6 @@
 window.onload = start
 
-var BENCH = true
+var BENCH = false
 
 var dim = 5 // Cell Size
 var fps = 30
@@ -42,6 +42,11 @@ function startNormal() {
   window.onresize = reinit
   window.onkeydown = doKeyDown
 
+  // Desktop (Chrome)
+  c.onmousedown = gestureStartHandler
+  c.onmousemove = gestureMoveHandler
+  c.onmouseup   = gestureEndHandler
+
   // iOS todo rename "onAction"
   c.ontouchmove=iOSblockMove
   c.ontouchend=iOStoggle
@@ -73,6 +78,8 @@ function init(width, height) {
   cellsX = Math.floor(w/dim)
   cellsY = Math.floor(h/dim)
 
+  window.status='X=' + cellsX + ', Y=' + cellsX + ' dim=' + dim
+
   grid = new Grid(cellsX, cellsY)
 
   clear()
@@ -84,10 +91,27 @@ function init(width, height) {
 //    [ true,  false, false ],
 //    [ false, false, false ]
 //  ])
+//  acorn()
+}
+
+function acorn() {
+  var x = Math.floor(cellsX / 2)
+  var y = Math.floor(cellsY / 2)
+
+  grid.activate(x + 3, y + 2)
+  grid.activate(x + 2, y + 4)
+  grid.activate(x + 3, y + 4)
+  grid.activate(x + 5, y + 3)
+  grid.activate(x + 6, y + 4)
+  grid.activate(x + 7, y + 4)
+  grid.activate(x + 8, y + 4)
+
+  grid.commit()
+  drawGrid()
 }
 
 function random(x, y, alive) {
-  return Math.random() >= 0.5
+  return Math.random() >= 0.7
 }
 
 function drawGrid() {

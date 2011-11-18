@@ -13,7 +13,7 @@ function Grid(dimX, dimY) {
   var grid = newArray(cellCount, false)
   var dirty = new Dirty
   var changes = new Changes
-  var painting = Array()
+  var painting = Array() // todo Array() ?
 
 
   this.tick = function() {
@@ -45,7 +45,7 @@ function Grid(dimX, dimY) {
   }
 
   this.activate = function(x, y) {
-    prime(x, y, true)
+    this.prime(x, y, true)
   }
 
 
