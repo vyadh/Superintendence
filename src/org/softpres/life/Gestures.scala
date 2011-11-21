@@ -50,9 +50,8 @@ class Gestures(c: Component, listener: Gestures.Gesture => Unit = _ => ()) {
 
   def gestureEnd(x: Int, y: Int) {
     emit(Vector(last, Position(now, x, y)))
-    val vectors = this.vectors.toList
 
-    val filtered = filter(vectors)
+    val filtered = filterOp(vectors.toList)
     val path = aggregate(paths(filtered))
 
     listener(recognise(path))
@@ -72,7 +71,7 @@ class Gestures(c: Component, listener: Gestures.Gesture => Unit = _ => ()) {
   case class Vector(start: Position, end: Position) {
     def time = end.time - start.time
     def x = end.x - start.x
-    def y = (end.y - start.y)
+    def y = end.y - start.y
 
     def velocity = Velocity(magnitude, angle, direction)
 
@@ -103,7 +102,7 @@ class Gestures(c: Component, listener: Gestures.Gesture => Unit = _ => ()) {
   }
 
   /** Filter out both points of changes in direction, and small unintended perpendicular drifts. */
-  def filter(vectors: Seq[Vector]): Seq[Vector] = {
+  def filterOp(vectors: Seq[Vector]): Seq[Vector] = {
     val max = vectors.map(_.magnitude).max
     // Ignore anything under 20% of top speed
     vectors.filter(_.magnitude / max > 0.20)
