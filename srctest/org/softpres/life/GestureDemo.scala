@@ -8,12 +8,13 @@ import javax.swing.{JFrame, JPanel}
  * @author kieron
  */
 object GestureDemo extends App {
-  val p = new JPanel
+  
+  val c = new JPanel
 
-  Gestures(p, g => println(g)).start()
+  Gestures(c, (p, g) => println(p + ": " + g)).start()
 
   val f = new JFrame
-  f.setContentPane(p)
+  f.setContentPane(c)
   f.setSize(300, 300)
   f.setLocation(1000, 800)
   f.setVisible(true)

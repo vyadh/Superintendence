@@ -9,7 +9,9 @@ import java.awt.Component
  *
  * @author kieron
  */
-class Gestures(c: Component, listener: Gestures.Gesture => Unit = _ => ()) {
+class Gestures(
+      c: Component,
+      listener: (Gestures.Point, Gestures.Gesture) => Unit = (_, _) => ()) {
 
   import Gestures._
 
@@ -50,11 +52,14 @@ class Gestures(c: Component, listener: Gestures.Gesture => Unit = _ => ()) {
 
   def gestureEnd(x: Int, y: Int) {
     emit(Vector(last, Position(now, x, y)))
+    val vectorList = vectors.toList
 
-    val filtered = filterOp(vectors.toList)
+    val point = center(vectorList)
+
+    val filtered = filterOp(vectorList)
     val path = aggregate(paths(filtered))
 
-    listener(recognise(path))
+    listener(point, recognise(path))
   }
 
   def emit(vector: Vector) {
@@ -154,8 +159,8 @@ class Gestures(c: Component, listener: Gestures.Gesture => Unit = _ => ()) {
   // Gesture Analysis
 
   def recognise(path: List[Direction]) = path.size match {
-    case 0 => Point
-    case 1 => Line(path.head) //todo but Point, if magnitude is small (accidental mouse move on click)
+    case 0 => Dot
+    case 1 => Line(path.head) //todo but Dot, if magnitude is small (accidental mouse move on click)
     case 2 => Angle(path.head, path.drop(1).head)
     case 3 => gesture3(path.head, path.drop(1).head, path.drop(2).head)
     case n if n >= 6 && n <= 12 => circle(path).getOrElse(Complex(path))
@@ -194,7 +199,7 @@ class Gestures(c: Component, listener: Gestures.Gesture => Unit = _ => ()) {
    * Where a positive +ve value indicates clockwise, -ve is anti-clockwise.
    * A 'bump' is where "12 o'clock" is passed over.
    */
-  def clockDist(a:Int, b:Int) = if (a <= b) {
+  def clockDist(a: Int, b: Int) = if (a <= b) {
     val (bump, norm) = ((8-b)+a, b-a)
     val distance = math.min(bump, norm)
     val sign = if (distance == norm) 1 else -1
@@ -206,11 +211,20 @@ class Gestures(c: Component, listener: Gestures.Gesture => Unit = _ => ()) {
     sign * distance
   }
 
+  def center(vectors: List[Vector]): Point = {
+    val xs = vectors.map(_.start.x) ++ vectors.map(_.end.x)
+    val ys = vectors.map(_.start.y) ++ vectors.map(_.end.y)
+    val x = mid(xs.min, xs.max)
+    val y = mid(ys.min, ys.max)
+    Point(x, y)
+  }
+
+  def mid(min: Int, max: Int) = min + (max-min)/2
 }
 
 object Gestures {
 
-  def apply(c: Component, listener: Gesture => Unit) = new Gestures(c, listener)
+  def apply(c: Component, listener: (Point, Gesture) => Unit) = new Gestures(c, listener)
 
   sealed class Direction(val order: Int) {
     def opposite = this match {
@@ -234,11 +248,13 @@ object Gestures {
   case object W  extends Direction(7)
   case object NW extends Direction(8)
 
+  case class Point(x: Int, y: Int)
+
   trait Gesture
   case class Unknown(path: Seq[Direction]) extends Gesture
   case class Complex(path: Seq[Direction]) extends Gesture
 
-  case object Point extends Gesture
+  case object Dot extends Gesture
   case class Line   (dir: Direction) extends Gesture
   case class Angle  (a: Direction, b: Direction) extends Gesture
   case class ZigZag (a: Direction, b: Direction, c: Direction) extends Gesture

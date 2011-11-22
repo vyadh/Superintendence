@@ -85,13 +85,13 @@ function init(width, height) {
   clear()
 
   // Create a random population
-  showf(random)
-//  show([
-//    [ true,  false, false ],
-//    [ true,  false, false ],
-//    [ false, false, false ]
-//  ])
-//  acorn()
+//  showf(random)
+  show([
+    [ true,  false, false ],
+    [ true,  false, false ],
+    [ false, false, false ]
+  ])
+  acorn()
 }
 
 function acorn() {

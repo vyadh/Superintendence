@@ -31,13 +31,15 @@ function gestureMove(x, y) {
 function gestureEnd(x, y) {
   emit(vector(last, position(now(), x, y)))
 
+  var point = center(vectors)
+
   var filtered = filterOp(vectors)
   var path = aggregate(paths(filtered))
 
 //  listener(recognise(path))
   //todo remove
   var shape = recognise(path)
-  console.log(shape)
+  console.log(point +": " + shape)
 }
 
 function emit(vector) {
@@ -79,17 +81,50 @@ function recognise(path) {
     case 0: return "point"//Gesture.Point
     case 1: return "line"//Line(path[0]) //todo but Point, if magnitude is small (accidental mouse move on click)
     case 2: return "angle"//Angle(path[0], path[1])
-    case 3: return "g3"//gesture3(path[0], path[1], path[2])
+    case 3: return gesture3(path[0], path[1], path[2])
     default:
-//      if (n >= 6 && n <= 12) {
-//        var pcircle = circle(path)
-//        if (pcircle !== null) {
-//          return pcircle
-//        }
-//      }
+      if (n >= 6 && n <= 12) {
+        var pcircle = circle(path)
+        if (pcircle !== null) {
+          return pcircle
+        }
+      }
       return "complex"//Complex(path)
   }
 }
+
+function gesture3(a, b, c) {
+  if (a == c) return "zigzag"//ZigZag(a, b, c)
+  if (a == c.opposite) return "U"//U(a, b, c)
+  return "unknown"//Unknown(Seq(a, b, c))
+}
+
+function circle(path) {
+  if (path.size < 6) return null
+
+  if (increasing(path)) {
+    return "clock"//CircleClockwise
+  }
+  if (decreasing(path)) {
+    return "anti-clock"//CircleAntiClockwise
+  }
+  return null
+}
+
+function increasing(path) { return directed(path, function(x) { return x >= 0 }) }
+function decreasing(path) { return directed(path, function(x) { return x <  0 }) }
+
+function directed(path, predicate) {
+  for (var i=0; i<path.length-1; i++) {
+    var a = path[i]
+    var b = path[i+1]
+    if (!predicate(clockDist(a, b))) {
+      return false
+    }
+  }
+  return true
+}
+
 
 
 // Factory methods
@@ -139,6 +174,16 @@ function vector(start, end) {
   return res
 }
 
+function point(x, y) {
+  var res = new Object
+  res.x = x
+  res.y = y
+  res.toString = function() { return res.x + "," + res.y }
+  return res
+}
+
+
+// Objects
 
 var Direction = new Object()
 {
@@ -151,6 +196,22 @@ var Direction = new Object()
   Direction.W  = 7
   Direction.NW = 8
 }
+
+function opposite(direction) {
+  switch (direction) {
+    case Direction.N : return Direction.S
+    case Direction.NE: return Direction.SW
+    case Direction.E : return Direction.W
+    case Direction.SE: return Direction.NW
+    case Direction.S : return Direction.N
+    case Direction.SW: return Direction.NE
+    case Direction.W : return Direction.E
+    case Direction.NW: return Direction.SE
+  }
+}
+
+var CircleClockwise = new Object()
+var CircleAntiClockwise = new Object()
 
 
 // Utility methods
@@ -165,6 +226,51 @@ function slice(angle, around) {
 
 function between(n, min, max) {
   return n >= min && n <= max
+}
+
+/**
+ * The distance between the two closest points on a clock.
+ * Where a positive +ve value indicates clockwise, -ve is anti-clockwise.
+ * A 'bump' is where "12 o'clock" is passed over.
+ */
+function clockDist(a, b) {
+  if (a <= b) {
+    var bump = (8-b)+a
+    var norm = b-a
+    var distance = Math.min(bump, norm)
+    var sign = (distance == norm) ? 1 : -1
+    return sign * distance
+  } else {
+    var bump = (8-a)+b
+    var norm = a-b
+    var distance = Math.min(bump, norm)
+    var sign = (distance == norm) ? -1 : 1
+    return sign * distance
+  }
+}
+
+function center(vectors) {
+  var xs = Array()
+  addAll(xs, vectors.map(function(v) { return v.start.x }))
+  addAll(xs, vectors.map(function(v) { return v.end.x }))
+
+  var ys = Array()
+  addAll(ys, vectors.map(function(v) { return v.start.y }))
+  addAll(ys, vectors.map(function(v) { return v.end.y }))
+
+  var x = mid(min(xs), max(xs))
+  var y = mid(min(ys), max(ys))
+  return point(x, y)
+}
+
+function addAll(array, items) {
+  for (var i=0; i<items.length; i++) {
+    array.push(items[i])
+  }
+}
+
+function mid(min, max) {
+  return min + (max-min)/2
 }
 
 
@@ -185,6 +291,17 @@ function map(array, f) {
   var result = new Array(array.length)
   for (var i=0; i<array.length; i++) {
     result[i] = f(array[i])
+  }
+  return result
+}
+
+function min(array) {
+  var result = array[0]
+  for (var i=1; i<array.length; i++) {
+    var item = array[i]
+    if (item < result) {
+      result = item
+    }
   }
   return result
 }
