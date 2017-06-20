@@ -42,12 +42,9 @@ function startNormal() {
   window.onresize = reinit
   window.onkeydown = doKeyDown
 
-  // Desktop (Chrome)
-  c.onmousedown = gestureStartHandler
-  c.onmousemove = gestureMoveHandler
-  c.onmouseup   = gestureEndHandler
+  gestures_install(c)
 
-  // iOS todo rename "onAction"
+  // iOS todo refactor gestures
   c.ontouchmove=iOSblockMove
   c.ontouchend=iOStoggle
   c.ongesturestart=iOSgestureStart

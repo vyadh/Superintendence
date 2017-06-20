@@ -1,27 +1,61 @@
 
 // JS Event Handlers
 
-var drag = false
-function gestureStartHandler(e) { drag = true;  gestureStart(e.x, e.y) }
-function gestureEndHandler(e)   { drag = false; gestureEnd  (e.x, e.y) }
-function gestureMoveHandler(e)  { if (drag) { gestureMove(e.x, e.y) } }
+function gestures_install() {
+  var isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1;
+
+  // Desktop (Chrome)
+  if (!isAndroid) {
+    c.onmousedown = gestureStartHandler
+    c.onmousemove = gestureMoveHandler
+    c.onmouseup   = gestureEndHandler
+  }
+
+  // Android (Chrome)
+  if (isAndroid) {
+    c.addEventListener('touchstart', gestureAndroidStartHandler, false)
+    c.addEventListener("touchmove", gestureAndroidMoveHandler, false)
+    c.addEventListener("touchend", gestureAndroidEndHandler, false)
+  }
+}
+
+function gestureStartHandler(e) { gestureStart(e.x, e.y) }
+function gestureEndHandler(e)   { gestureEnd  (e.x, e.y) }
+function gestureMoveHandler(e)  { gestureMove(e.x, e.y) }
+
+function gestureAndroidStartHandler(e) {
+  if (event.targetTouches.length == 1) {
+    var touch = event.targetTouches[0];
+    gestureStart(touch.pageX, touch.pageY)
+  }
+}
+function gestureAndroidMoveHandler(e) {
+  if (event.targetTouches.length == 1) {
+    var touch = event.targetTouches[0];
+    gestureMove(touch.pageX, touch.pageY)
+  }
+}
+function gestureAndroidEndHandler(e) {
+  gestureEnd(last.x, last.x)
+}
 
 // Events
 
+var drag = false
 var granularity = 50 // ms
-var lastPosition = null
 var vectors = Array()
 var last = null
 
 
 function gestureStart(x, y) {
+  drag = true
   vectors = Array()
   last = position(now(), x, y)
 }
 
 function gestureMove(x, y) {
   var time = now()
-  if ((time - last.time) > granularity) {
+  if (drag && (time - last.time) > granularity) {
     var pos = position(time, x, y)
     emit(vector(last, pos))
     last = pos
@@ -29,6 +63,7 @@ function gestureMove(x, y) {
 }
 
 function gestureEnd(x, y) {
+  drag = false
   emit(vector(last, position(now(), x, y)))
 
   var point = center(vectors)
