@@ -208,6 +208,10 @@ function gestureHandler(point, shape, path) {
   if (shape === "angle") {
     activateByPoint(point, acorn())
   }
+  if (shape === "anti-clock") {
+    grid.clear()
+    clear()
+  }
 }
 
 

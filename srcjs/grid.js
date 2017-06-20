@@ -15,6 +15,13 @@ function Grid(dimX, dimY) {
   var changes = new Changes
   var painting = Array() // todo Array() ?
 
+  this.clear = function() {
+   grid = newArray(cellCount, false)
+   dirty.consume()
+   changes.consume()
+   painting = Array()
+   this.draw()
+  }
 
   this.tick = function() {
     this.step()
