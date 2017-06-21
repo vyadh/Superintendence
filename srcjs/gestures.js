@@ -32,6 +32,7 @@ function Gestures(listener) {
     }
   }
   function gestureAndroidMoveHandler(e) {
+    e.preventDefault()
     if (event.targetTouches.length == 1) {
       var touch = event.targetTouches[0];
       gestureMove(touch.pageX, touch.pageY)

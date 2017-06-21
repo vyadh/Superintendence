@@ -1,6 +1,7 @@
 window.onload = start
 
 var BENCH = false
+var isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1;
 
 var dim = 5 // Cell Size
 var fps = 30
@@ -41,17 +42,20 @@ function startBenchmark() {
 }
 
 function startNormal() {
-  window.onresize = reinit
-  window.onkeydown = doKeyDown
+//  window.onresize = reinit
+//
+//  if (!isAndroid) {
+//    window.onkeydown = doKeyDown
+//  }
 
   gestures.install(c)
 
   // iOS todo refactor gestures
-  c.ontouchmove=iOSblockMove
-  c.ontouchend=iOStoggle
-  c.ongesturestart=iOSgestureStart
-  c.ongesturechange=iOSgesture
-  c.ongestureend=iOSgestureEnd
+//  c.ontouchmove=iOSblockMove
+//  c.ontouchend=iOStoggle
+//  c.ongesturestart=iOSgestureStart
+//  c.ongesturechange=iOSgesture
+//  c.ongestureend=iOSgestureEnd
 
   reinit()
 }
@@ -105,7 +109,7 @@ function drawGrid() {
 function doKeyDown(event) {
   switch (event.keyCode) {
     case 32: // Space
-      toggle()
+//      toggle()
       break;
     case 83: // 's'
       tick()
