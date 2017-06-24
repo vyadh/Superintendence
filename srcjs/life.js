@@ -198,12 +198,31 @@ function gestureHandler(point, shape, path) {
       }
       break;
     case "zigzag":
-      showf(random)
+      activateByPoint(point, shapes.pi_heptomino())
       break;
     case "angle":
-      activateByPoint(point, shapes.acorn())
+      activateByPoint(point, shapes.pentadecathlon())
+      break;
+    case "clock":
+      activateByPoint(point, shapes.koks_galaxy())
       break;
     case "anti-clock":
+      activateByPoint(point, shapes.tumbler())
+      break;
+    case "complex":
+      activateByPoint(point, shapes.acorn())
+      break;
+    case "U":
+      activateByPoint(point, shapes.washer_woman())
+      break;
+
+    case "?": //todo
+      activateByPoint(point, shapes.hwss())
+      break;
+    case "?": //todo
+      showf(random)
+      break;
+    case "?": //todo
       grid.clear()
       clear()
       break;
