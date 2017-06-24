@@ -5,6 +5,7 @@ function Gestures(listener) {
 
   this.install = function(canvas) {
     var isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1;
+    var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
 
     // Desktop (Chrome)
     if (!isAndroid) {
@@ -19,6 +20,9 @@ function Gestures(listener) {
       canvas.addEventListener("touchmove", gestureAndroidMoveHandler, false)
       canvas.addEventListener("touchend", gestureAndroidEndHandler, false)
     }
+
+    // iOS (Safari)
+    installAppleGestures(canvas)
   }
 
   function gestureStartHandler(e) { gestureStart(e.x, e.y) }
@@ -41,6 +45,24 @@ function Gestures(listener) {
   function gestureAndroidEndHandler(e) {
     gestureEnd(last.x, last.x)
   }
+
+
+  function installAppleGestures(canvas) {
+    var zooming = false
+
+    function iOSblockMove(event) {  event.preventDefault() }
+    function iOStoggle(event) {  if (!zooming) { toggle() } }
+    function iOSgestureStart(event) { zooming = true }
+    function iOSgesture(event) { zoom(event.scale >= 1) }
+    function iOSgestureEnd(event) { zooming = false }
+
+    canvas.ontouchmove = iOSblockMove
+    canvas.ontouchend = iOStoggle
+    canvas.ongesturestart = iOSgestureStart
+    canvas.ongesturechange = iOSgesture
+    canvas.ongestureend = iOSgestureEnd
+  }
+
 
   // Events
 

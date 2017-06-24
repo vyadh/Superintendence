@@ -1,7 +1,7 @@
 window.onload = start
 
 var BENCH = false
-var isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1;
+var android = navigator.userAgent.toLowerCase().indexOf("android") > -1;
 
 var dim = 5 // Cell Size
 var fps = 30
@@ -42,34 +42,17 @@ function startBenchmark() {
 }
 
 function startNormal() {
-//  window.onresize = reinit
-//
-//  if (!isAndroid) {
-//    window.onkeydown = doKeyDown
-//  }
-
+  if (!android) {
+    window.onkeydown = doKeyDown
+  }
   gestures.install(c)
 
-  // iOS todo refactor gestures
-//  c.ontouchmove=iOSblockMove
-//  c.ontouchend=iOStoggle
-//  c.ongesturestart=iOSgestureStart
-//  c.ongesturechange=iOSgesture
-//  c.ongestureend=iOSgestureEnd
-
+  window.onresize = reinit
   reinit()
 }
 
-var zooming = false
-function iOSblockMove(event) {  event.preventDefault() }
-function iOStoggle(event) {  if (!zooming) { toggle() } }
-function iOSgestureStart(event) { zooming = true }
-function iOSgesture(event) { zoom(event.scale >= 1) }
-function iOSgestureEnd(event) { zooming = false }
-
 function reinit() {
   init(window.innerWidth, window.innerHeight)
-//  init(120, 120)
 }
 
 function init(width, height) {
@@ -91,7 +74,6 @@ function init(width, height) {
   var midY = Math.floor(cellsY / 2)
 
   drawGrid()
-  toggle()
 }
 
 // Create a random population
@@ -109,7 +91,7 @@ function drawGrid() {
 function doKeyDown(event) {
   switch (event.keyCode) {
     case 32: // Space
-//      toggle()
+      toggle()
       break;
     case 83: // 's'
       tick()
