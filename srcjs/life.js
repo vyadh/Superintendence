@@ -74,6 +74,8 @@ function init(width, height) {
   var midX = Math.floor(cellsX / 2)
   var midY = Math.floor(cellsY / 2)
 
+//  activate(midX / 2, 20, shapes.title())
+  activate(midX / 2, 20, shapes.acorn())
   drawGrid()
 }
 
