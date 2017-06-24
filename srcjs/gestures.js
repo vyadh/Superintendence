@@ -76,6 +76,7 @@ function Gestures(listener) {
     drag = true
     vectors = Array()
     last = position(now(), x, y)
+    emit(vector(last, last))
   }
 
   function gestureMove(x, y) {

@@ -74,8 +74,7 @@ function init(width, height) {
   var midX = Math.floor(cellsX / 2)
   var midY = Math.floor(cellsY / 2)
 
-//  activate(midX / 2, 20, shapes.title())
-  activate(midX / 2, 20, shapes.acorn())
+  activate(20, 20, shapes.title())
   drawGrid()
 }
 
@@ -185,19 +184,23 @@ function clear() {
 
 function gestureHandler(point, shape, path) {
   console.log(point +": " + path + " -> " + shape)
-  if (shape === "line" && Direction.diagonal(path[0])) {
+
+  if (shape === "point") {
+    activateByPoint(point, shapes.bomb())
+  }
+  else if (shape === "line" && Direction.diagonal(path[0])) {
     activateByPoint(point, shapes.glider(path[0]))
   }
-  if (shape === "line" && Direction.pure(path[0])) {
+  else if (shape === "line" && Direction.pure(path[0])) {
     activateByPoint(point, shapes.lightweightSpaceship(path[0]))
   }
-  if (shape === "zigzag") {
+  else if (shape === "zigzag") {
     showf(random)
   }
-  if (shape === "angle") {
+  else if (shape === "angle") {
     activateByPoint(point, shapes.acorn())
   }
-  if (shape === "anti-clock") {
+  else if (shape === "anti-clock") {
     grid.clear()
     clear()
   }
@@ -207,10 +210,13 @@ function activateByPoint(point, shape) {
   activate(cx(point.x), cy(point.y), shape)
 }
 
-function activate(x, y, shape) {
+function activate(rx, ry, shape) {
   if (shape === undefined) {
     return
   }
+  var x = Math.round(rx)
+  var y = Math.round(ry)
+
   for (var j=0; j<shape.length; j++) {
     for (var i=0; i<shape[j].length; i++) {
       if (shape[j][i] === 1) {
