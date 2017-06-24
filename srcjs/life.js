@@ -1,4 +1,4 @@
-window.onload = start
+window.onload = main
 
 var BENCH = false
 var android = navigator.userAgent.toLowerCase().indexOf("android") > -1;
@@ -19,18 +19,18 @@ var gestures = new Gestures(gestureHandler)
 var shapes = new Shapes()
 
 
-function start() {
+function main() {
   c = canvas()
   g = context()
 
   if (BENCH) {
-    startBenchmark()
+    mainBenchmark()
   } else {
-    startNormal()
+    mainNormal()
   }
 }
 
-function startBenchmark() {
+function mainBenchmark() {
   // Beefy PC
   dim = 2
   init(500, 400)
@@ -42,7 +42,7 @@ function startBenchmark() {
 //  benchmark(225, tick)
 }
 
-function startNormal() {
+function mainNormal() {
   if (!android) {
     window.onkeydown = doKeyDown
   }
@@ -93,7 +93,7 @@ function drawGrid() {
 function doKeyDown(event) {
   switch (event.keyCode) {
     case 32: // Space
-      toggle()
+      ensureStarted()
       break;
     case 83: // 's'
       tick()
@@ -150,6 +150,12 @@ function toggle() {
   }
 }
 
+function ensureStarted() {
+  if (!isAnimating()) {
+    animate(fps)
+  }
+}
+
 function isAnimating() {
   return ticker !== undefined
 }
@@ -183,6 +189,7 @@ function clear() {
 //==-- Gesture Handling
 
 function gestureHandler(point, shape, path) {
+  ensureStarted()
   console.log(point +": " + path + " -> " + shape)
 
   switch (shape) {

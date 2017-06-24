@@ -22,7 +22,9 @@ function Gestures(listener) {
     }
 
     // iOS (Safari)
-    installAppleGestures(canvas)
+    if (iOS) {
+      installAppleGestures(canvas)
+    }
   }
 
   function gestureStartHandler(e) { gestureStart(e.x, e.y) }
