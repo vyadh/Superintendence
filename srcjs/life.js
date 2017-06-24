@@ -16,6 +16,7 @@ var grid   // Cell state
 var ticker // Animation timer, handle used for cancelling
 
 var gestures = new Gestures(gestureHandler)
+var shapes = new Shapes()
 
 
 function start() {
@@ -183,63 +184,21 @@ function clear() {
 function gestureHandler(point, shape, path) {
   console.log(point +": " + path + " -> " + shape)
   if (shape === "line" && Direction.diagonal(path[0])) {
-    activateByPoint(point, glider(path[0]))
+    activateByPoint(point, shapes.glider(path[0]))
   }
   if (shape === "line" && Direction.pure(path[0])) {
-    activateByPoint(point, lightweightSpaceship(path[0]))
+    activateByPoint(point, shapes.lightweightSpaceship(path[0]))
   }
   if (shape === "zigzag") {
     showf(random)
   }
   if (shape === "angle") {
-    activateByPoint(point, acorn())
+    activateByPoint(point, shapes.acorn())
   }
   if (shape === "anti-clock") {
     grid.clear()
     clear()
   }
-}
-
-
-//==-- Shapes
-
-function acorn() {
-  return [
-    [0,0,0,0,0,0,0,0],
-    [0,0,1,0,0,0,0,0],
-    [0,0,0,0,1,0,0,0],
-    [0,1,1,0,0,1,1,1],
-  ]
-}
-
-function glider(dir) {
-  var se = [
-    [0,0,1],
-    [1,0,1],
-    [0,1,1]
-  ]
-  if (dir == Direction.SE) return se
-  if (dir == Direction.SW) return reflectX(se)
-  if (dir == Direction.NE) return reflectY(se)
-  if (dir == Direction.NW) return reflectX(reflectY(se))
-
-  return undefined
-}
-
-function lightweightSpaceship(dir) {
-  var west = [
-    [0,1,0,0,1],
-    [1,0,0,0,0],
-    [1,0,0,0,1],
-    [1,1,1,1,0],
-    [0,0,0,0,0]
-  ]
-  if (dir == Direction.W) return west
-  if (dir == Direction.E) return reflectX(west)
-  if (dir == Direction.N) return rotateRight(west)
-  if (dir == Direction.S) return reflectY(rotateRight(west))
-
-  return undefined
 }
 
 function activateByPoint(point, shape) {
@@ -274,40 +233,6 @@ function context() { return canvas().getContext('2d') }
 
 function cx(x) { return Math.floor(x/dim) }
 function cy(y) { return Math.floor(y/dim) }
-
-function reflectX(matrix) {
-  var res = new Array(matrix.length)
-  for (var y=0; y<matrix.length; y++) {
-    var row = matrix[y]
-    res[y] = new Array(row.length)
-    for (var x=0; x<row.length; x++) {
-      res[y][row.length - x - 1] = matrix[y][x]
-    }
-  }
-  return res
-}
-
-function reflectY(matrix) {
-  var res = new Array(matrix.length)
-  for (var y=0; y<matrix.length; y++) {
-    var row = matrix[y]
-    res[y] = matrix[row.length - y - 1]
-  }
-  return res
-}
-
-function rotateRight(matrix) {
-  var dim = matrix.length
-  var res = new Array(dim)
-  for (var y=0; y<dim; y++) {
-    var row = matrix[y]
-    res[y] = new Array(dim)
-    for (var x=0; x<dim; x++) {
-      res[y][x] = matrix[dim-x-1][y]
-    }
-  }
-  return res
-}
 
 
 //==-- Benchmark (Beefy)
