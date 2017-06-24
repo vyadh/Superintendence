@@ -185,24 +185,28 @@ function clear() {
 function gestureHandler(point, shape, path) {
   console.log(point +": " + path + " -> " + shape)
 
-  if (shape === "point") {
-    activateByPoint(point, shapes.bomb())
-  }
-  else if (shape === "line" && Direction.diagonal(path[0])) {
-    activateByPoint(point, shapes.glider(path[0]))
-  }
-  else if (shape === "line" && Direction.pure(path[0])) {
-    activateByPoint(point, shapes.lightweightSpaceship(path[0]))
-  }
-  else if (shape === "zigzag") {
-    showf(random)
-  }
-  else if (shape === "angle") {
-    activateByPoint(point, shapes.acorn())
-  }
-  else if (shape === "anti-clock") {
-    grid.clear()
-    clear()
+  switch (shape) {
+    case "point":
+      activateByPoint(point, shapes.bomb())
+      break;
+    case "line":
+      if (Direction.diagonal(path[0])) {
+        activateByPoint(point, shapes.glider(path[0]))
+      }
+      else if (Direction.pure(path[0])) {
+        activateByPoint(point, shapes.lightweightSpaceship(path[0]))
+      }
+      break;
+    case "zigzag":
+      showf(random)
+      break;
+    case "angle":
+      activateByPoint(point, shapes.acorn())
+      break;
+    case "anti-clock":
+      grid.clear()
+      clear()
+      break;
   }
 }
 
