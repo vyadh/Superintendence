@@ -217,14 +217,14 @@ function gestureHandler(point, shape, path) {
       activateByPoint(point, shapes.tumbler())
       break;
     case "complex":
-      activateByPoint(point, shapes.acorn())
+      activateByPoint(point, shapes.hwss())
       break;
     case "U":
       activateByPoint(point, shapes.washer_woman())
       break;
 
     case "?": //todo
-      activateByPoint(point, shapes.hwss())
+      activateByPoint(point, shapes.acorn())
       break;
     case "?": //todo
       showf(random)
