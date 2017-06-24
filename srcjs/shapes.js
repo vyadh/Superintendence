@@ -16,48 +16,138 @@ function Shapes() {
 
   // Spaceships
 
-  this.hwss = function() {
-    return [
-      [0,0,0,1,1,0,0],
-      [0,1,0,0,0,0,1],
-      [1,0,0,0,0,0,0],
-      [1,0,0,0,0,0,1],
-      [1,1,1,1,1,1,0],
-    ]
-  }
-
   this.glider = function(dir) {
     var se = [
       [0,0,1],
       [1,0,1],
       [0,1,1]
     ]
-    if (dir == Direction.SE) return se
-    if (dir == Direction.SW) return reflectX(se)
-    if (dir == Direction.NE) return reflectY(se)
-    if (dir == Direction.NW) return reflectX(reflectY(se))
-
-    return undefined
+    return aim_diagonal(se, dir)
   }
 
-  this.lightweightSpaceship = function(dir) {
+  this.lightWeightSpaceship = function(dir) {
     var west = [
       [0,1,0,0,1],
       [1,0,0,0,0],
       [1,0,0,0,1],
       [1,1,1,1,0],
-      [0,0,0,0,0]
+      [0,0,0,0,0],
     ]
-    if (dir == Direction.W) return west
-    if (dir == Direction.E) return reflectX(west)
-    if (dir == Direction.N) return rotateRight(west)
-    if (dir == Direction.S) return reflectY(rotateRight(west))
+    return aim_orthogonal(west, dir)
+  }
 
-    return undefined
+  this.middleWeightSpaceship = function(dir) {
+    var west = [
+      [0,0,0,1,0,0],
+      [0,1,0,0,0,1],
+      [1,0,0,0,0,0],
+      [1,0,0,0,0,1],
+      [1,1,1,1,1,0],
+      [0,0,0,0,0,0],
+    ]
+    return aim_orthogonal(west, dir)
+  }
+
+  this.heavyWeightSpaceship = function(dir) {
+    var west = [
+      [0,0,0,0,0,0,0],
+      [0,0,0,1,1,0,0],
+      [0,1,0,0,0,0,1],
+      [1,0,0,0,0,0,0],
+      [1,0,0,0,0,0,1],
+      [1,1,1,1,1,1,0],
+      [0,0,0,0,0,0,0],
+    ]
+    return aim_orthogonal(west, dir)
   }
 
 
-  // Stable Static
+  // Still Life (or pseudo)
+
+  this.block = function() {
+    return [
+      [1,1],
+      [1,1],
+    ]
+  }
+
+  this.beehive = function() {
+    return [
+      [0,1,1,0],
+      [1,0,0,1],
+      [0,1,1,0],
+    ]
+  }
+
+  this.aircraft_carrier = function() {
+    return [
+      [1,1,0,0],
+      [1,0,0,1],
+      [0,0,1,1],
+    ]
+  }
+
+  this.pond = function() {
+    return [
+      [0,1,1,0],
+      [1,0,0,1],
+      [1,0,0,1],
+      [0,1,1,0],
+    ]
+  }
+
+  this.barge = function() {
+    return [
+      [0,1,0,0],
+      [1,0,1,0],
+      [0,1,0,1],
+      [0,0,1,0],
+    ]
+  }
+
+  this.small_lake = function() {
+    return [
+      [0,0,0,0,1,0,0,0,0],
+      [0,0,0,1,0,1,0,0,0],
+      [0,0,0,1,0,1,0,0,0],
+      [0,1,1,0,0,0,1,1,0],
+      [1,0,0,0,0,0,0,0,1],
+      [0,1,1,0,0,0,1,1,0],
+      [0,0,0,1,0,1,0,0,0],
+      [0,0,0,1,0,1,0,0,0],
+      [0,0,0,0,1,0,0,0,0],
+    ]
+  }
+
+  this.lake = function() {
+    return [
+      [0,0,0,0,1,1,0,0,0,0],
+      [0,0,0,1,0,0,1,0,0,0],
+      [0,0,0,1,0,0,1,0,0,0],
+      [0,1,1,0,0,0,0,1,1,0],
+      [1,0,0,0,0,0,0,0,0,1],
+      [1,0,0,0,0,0,0,0,0,1],
+      [0,1,1,0,0,0,0,1,1,0],
+      [0,0,0,1,0,0,1,0,0,0],
+      [0,0,0,1,0,0,1,0,0,0],
+      [0,0,0,0,1,1,0,0,0,0],
+    ]
+  }
+
+  this.bi_loaf_still = function() {
+    return [
+      [0,0,1,0,0,0,0],
+      [0,1,0,1,0,0,0],
+      [1,0,0,1,0,0,0],
+      [0,1,1,0,1,1,0],
+      [0,0,0,1,0,0,1],
+      [0,0,0,1,0,1,0],
+      [0,0,0,0,1,0,0],
+    ]
+  }
+
+
+  // Degrades to Still Life
 
   this.very_long_house = function() {
     return [
@@ -144,6 +234,26 @@ function Shapes() {
     ]
   }
 
+
+  // Transformations
+
+  function aim_orthogonal(shape_west, dir) {
+    if (dir == Direction.W) return shape_west
+    if (dir == Direction.E) return reflectX(shape_west)
+    if (dir == Direction.N) return rotateRight(shape_west)
+    if (dir == Direction.S) return reflectY(rotateRight(shape_west))
+
+    return undefined
+  }
+
+  function aim_diagonal(shape_se, dir) {
+    if (dir == Direction.SE) return shape_se
+    if (dir == Direction.SW) return reflectX(shape_se)
+    if (dir == Direction.NE) return reflectY(shape_se)
+    if (dir == Direction.NW) return reflectX(reflectY(shape_se))
+
+    return undefined
+  }
 
   function reflectX(matrix) {
     var res = new Array(matrix.length)
