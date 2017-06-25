@@ -216,7 +216,7 @@ function gestureHandler(point, shape, path) {
       activateByPoint(point, shapes.tumbler())
       break;
     case "complex":
-      activateByPoint(point, shapes.hwss())
+      activateByPoint(point, shapes.lake())
       break;
     case "U":
       activateByPoint(point, shapes.very_long_house())
@@ -236,11 +236,20 @@ function gestureHandler(point, shape, path) {
   }
 }
 
-function activateByPoint(point, shape) {
-  activate(cx(point.x), cy(point.y), shape)
+function activateByPoint(screenPoint, shape) {
+  var gridPoint = screenPointToGrid(screenPoint)
+  var point = centreOnShape(gridPoint, shape)
+  activate(point.x, point.y, shape)
 }
 
-//todo center shape pos on rx,ry
+function centreOnShape(point, shape) {
+  var h = shape.length
+  var w = shape[0].length
+  var cx = Math.floor(point.x - (w / 2))
+  var cy = Math.floor(point.y - (h / 2))
+  return {x: cx, y: cy}
+}
+
 function activate(rx, ry, shape) {
   if (shape === undefined) {
     return
@@ -270,8 +279,11 @@ function activate(rx, ry, shape) {
 function canvas()  { return document.getElementById('life') }
 function context() { return canvas().getContext('2d') }
 
-function cx(x) { return Math.floor(x/dim) }
-function cy(y) { return Math.floor(y/dim) }
+function screenPointToGrid(point) {
+  var cx = Math.floor(point.x / dim)
+  var cy = Math.floor(point.y / dim)
+  return {x: cx, y: cy}
+}
 
 
 //==-- Benchmark (Beefy)
