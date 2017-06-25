@@ -4,7 +4,7 @@ var BENCH = false
 var android = navigator.userAgent.toLowerCase().indexOf("android") > -1;
 
 var dim = 5 // Cell Size
-var fps = 20
+var fps = 15
 
 var c // Canvas
 var g // Graphics Context
@@ -157,7 +157,7 @@ function ensureStarted() {
 }
 
 function isAnimating() {
-  return ticker !== undefined
+  return !(typeof ticker === "undefined")
 }
 
 function animate(fps) {
@@ -189,7 +189,6 @@ function clear() {
 //==-- Gesture Handling
 
 function gestureHandler(point, shape, path) {
-  ensureStarted()
   console.log(point +": " + path + " -> " + shape)
 
   switch (shape) {
@@ -230,6 +229,10 @@ function gestureHandler(point, shape, path) {
       grid.clear()
       clear()
       break;
+  }
+
+  if (!isAnimating()) {
+    drawGrid()
   }
 }
 
