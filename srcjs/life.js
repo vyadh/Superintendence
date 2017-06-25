@@ -4,7 +4,7 @@ var BENCH = false
 var android = navigator.userAgent.toLowerCase().indexOf("android") > -1;
 
 var dim = 5 // Cell Size
-var fps = 30
+var fps = 20
 
 var c // Canvas
 var g // Graphics Context
@@ -34,7 +34,7 @@ function mainBenchmark() {
   // Beefy PC
   dim = 2
   init(500, 400)
-  benchmark(200, tick)
+  benchmark(50000, tick)
 
   // MacBook
 //  dim = 3
@@ -201,7 +201,7 @@ function gestureHandler(point, shape, path) {
         activateByPoint(point, shapes.glider(path[0]))
       }
       else if (Direction.pure(path[0])) {
-        activateByPoint(point, shapes.lightweightSpaceship(path[0]))
+        activateByPoint(point, shapes.lightWeightSpaceship(path[0]))
       }
       break;
     case "zigzag":
@@ -220,12 +220,9 @@ function gestureHandler(point, shape, path) {
       activateByPoint(point, shapes.hwss())
       break;
     case "U":
-      activateByPoint(point, shapes.washer_woman())
+      activateByPoint(point, shapes.very_long_house())
       break;
 
-    case "?": //todo
-      activateByPoint(point, shapes.acorn())
-      break;
     case "?": //todo
       showf(random)
       break;
@@ -240,6 +237,7 @@ function activateByPoint(point, shape) {
   activate(cx(point.x), cy(point.y), shape)
 }
 
+//todo center shape pos on rx,ry
 function activate(rx, ry, shape) {
   if (shape === undefined) {
     return
@@ -277,6 +275,9 @@ function cy(y) { return Math.floor(y/dim) }
 // 4880: Original
 // 4395: Optimised
 // 4305: Changed slice to use buffered array (very little benefit in JS)
+// Year 2017
+//  ~50: Chrome 59 @ 200 iterations (!)
+// 4200: Chrome 59 @ 50,000 iterations
 
 function benchmark(iterations, f) {
   var i = iterations
