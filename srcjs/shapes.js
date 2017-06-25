@@ -31,7 +31,6 @@ function Shapes() {
       [1,0,0,0,0],
       [1,0,0,0,1],
       [1,1,1,1,0],
-      [0,0,0,0,0],
     ]
     return aim_orthogonal(west, dir)
   }
@@ -43,21 +42,31 @@ function Shapes() {
       [1,0,0,0,0,0],
       [1,0,0,0,0,1],
       [1,1,1,1,1,0],
-      [0,0,0,0,0,0],
     ]
     return aim_orthogonal(west, dir)
   }
 
   this.heavyWeightSpaceship = function(dir) {
     var west = [
-      [0,0,0,0,0,0,0],
       [0,0,0,1,1,0,0],
       [0,1,0,0,0,0,1],
       [1,0,0,0,0,0,0],
       [1,0,0,0,0,0,1],
       [1,1,1,1,1,1,0],
-      [0,0,0,0,0,0,0],
     ]
+    return aim_orthogonal(west, dir)
+  }
+
+  this.hivenudger = function(dir) {
+    var left_a = this.lightWeightSpaceship(Direction.W)
+    var left_b = reflectY(left_a)
+
+    var top = concat(compose_x)(left_b, space(3, 5), left_a)
+    var mid = concat(compose_x)(space(5, 3), block(2, 3), space(6, 3))
+    var bot = reflectY(top)
+
+    var west = concat(compose_y)(top, space(1, 1), mid, space(1, 1), bot)
+
     return aim_orthogonal(west, dir)
   }
 
@@ -271,22 +280,94 @@ function Shapes() {
     var res = new Array(matrix.length)
     for (var y=0; y<matrix.length; y++) {
       var row = matrix[y]
-      res[y] = matrix[row.length - y - 1]
+      res[y] = matrix[matrix.length - y - 1]
     }
     return res
   }
 
   function rotateRight(matrix) {
-    var dim = matrix.length
-    var res = new Array(dim)
-    for (var y=0; y<dim; y++) {
-      var row = matrix[y]
-      res[y] = new Array(dim)
-      for (var x=0; x<dim; x++) {
-        res[y][x] = matrix[dim-x-1][y]
+    var dim_y = matrix.length
+    var dim_x = matrix[0].length
+    var res = newMatrix(dim_y, dim_x)
+    for (var y = 0; y < dim_y; y++) {
+      for (var x = 0; x < dim_x; x++) {
+        res[x][dim_y-1-y] = matrix[y][x]
+      }
+    }
+    return res;
+  }
+
+  function rotateLeft(matrix) {
+    return times(rotateRight, matrix, 3)
+  }
+
+  function newMatrix(dim_x, dim_y) {
+    var res = new Array(dim_y)
+    for (var y=0; y<dim_y; y++) {
+      res[y] = new Array(dim_x)
+    }
+    return res
+  }
+
+  function times(f, matrix, n) {
+    var res = matrix
+    for (var i=0; i<n; i++) {
+      res = f(res)
+    }
+    return res
+  }
+
+  function block(x, y) {
+    return populate(x, y, 1)
+  }
+
+  function space(x, y) {
+    return populate(x, y, 0)
+  }
+
+  function populate(dim_x, dim_y, value) {
+    var res = new Array(dim_y)
+    for (var y=0; y<dim_y; y++) {
+      res[y] = new Array(dim_x)
+      for (var x=0; x<dim_x; x++) {
+        res[y][x] = value
       }
     }
     return res
+  }
+
+  function concat(compose) {
+    return function() {
+      if (arguments.length === 0) {
+        return []
+      }
+
+      var last = arguments[0]
+      for (var i = 1; i < arguments.length; i++) {
+        var next = arguments[i]
+        last = compose(last, next)
+      }
+      return last
+    }
+  }
+
+  function compose_y(a, b) {
+    var res = new Array(a.length + b.length)
+    var y = 0
+    for (var y1=0; y1<a.length; y1++) {
+      res[y++] = a[y1]
+    }
+    for (var y2=0; y2<b.length; y2++) {
+      res[y++] = b[y2]
+    }
+    return res
+  }
+
+  function compose_x(a, b) {
+    var aRight = rotateRight(a)
+    var bRight = rotateRight(b)
+    var arOverBr = compose_y(aRight, bRight)
+    return rotateLeft(arOverBr)
   }
 
 }
