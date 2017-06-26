@@ -37,12 +37,20 @@ function mainBenchmark() {
   // Beefy PC
   dim = 2
   init(500, 400)
-  benchmark(50000, tick)
+  displayAcorn()
+  benchmark(5000, tick)
 
   // MacBook
 //  dim = 3
 //  init(500, 400)
 //  benchmark(225, tick)
+}
+
+function displayAcorn() {
+  var x = Math.floor(cellsX / 2)
+  var y = Math.floor(cellsY / 2)
+  activate(x, y, shapes.acorn())
+  drawGrid()
 }
 
 function mainNormal() {
@@ -53,6 +61,9 @@ function mainNormal() {
 
   window.onresize = reinit
   reinit()
+
+  activate(20, 20, shapes.title())
+  drawGrid()
 
   if (mobile) {
     ensureStarted()
@@ -80,9 +91,6 @@ function init(width, height) {
 
   var midX = Math.floor(cellsX / 2)
   var midY = Math.floor(cellsY / 2)
-
-  activate(20, 20, shapes.title())
-  drawGrid()
 }
 
 // Create a random population
@@ -298,8 +306,8 @@ function screenPointToGrid(point) {
 // 4395: Optimised
 // 4305: Changed slice to use buffered array (very little benefit in JS)
 // Year 2017
-//  ~50: Chrome 59 @ 200 iterations (!)
-// 4200: Chrome 59 @ 50,000 iterations
+//  ~60: Chrome 59 @ 200 iterations (!)
+// 3900: Chrome 59 @ 5000 iterations
 
 function benchmark(iterations, f) {
   var i = iterations
