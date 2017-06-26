@@ -1,10 +1,13 @@
 window.onload = main
 
 var BENCH = false
-var android = navigator.userAgent.toLowerCase().indexOf("android") > -1;
 
-var dim = 5 // Cell Size
-var fps = 15
+var android = navigator.userAgent.toLowerCase().indexOf("android") > -1;
+var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+var mobile = android || iOS
+
+var dim = mobile ? 10 : 5 // Cell Size
+var fps = mobile ? 20 : 15
 
 var c // Canvas
 var g // Graphics Context
@@ -43,13 +46,17 @@ function mainBenchmark() {
 }
 
 function mainNormal() {
-  if (!android) {
+  if (!mobile) {
     window.onkeydown = doKeyDown
   }
   gestures.install(c)
 
   window.onresize = reinit
   reinit()
+
+  if (mobile) {
+    ensureStarted()
+  }
 }
 
 function reinit() {
