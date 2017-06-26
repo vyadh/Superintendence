@@ -13,7 +13,8 @@ function Grid(dimX, dimY) {
   var grid = newArray(cellCount, false)
   var dirty = new Dirty
   var changes = new Changes
-  var painting = Array() // todo Array() ?
+  /** Array of only the changes required to update the grid. */
+  var painting = Array()
 
   this.clear = function() {
    grid = newArray(cellCount, false)
@@ -142,6 +143,7 @@ function Grid(dimX, dimY) {
     }
     return sum
   }
+
 /*
   function toString {
     var rows = grid.sliding(dimX, dimX)
@@ -151,6 +153,10 @@ function Grid(dimX, dimY) {
     return res
   }
 */
+
+  /*
+   * A buffered array with additional functionality to encode and decode indices.
+   */
   function Changes() {
     var changes = newBufferedArray(cellCount)
     var size = 0
@@ -172,15 +178,19 @@ function Grid(dimX, dimY) {
     }
   }
 
+  /*
+   * Simulate a set-like data structure using the buffered array,
+   * only adding changes if they don't exist.
+   */
   function Dirty() {
     var setView = new Array(cellCount)
     var dirty = newBufferedArray(cellCount)
     var size = 0
 
-    this.add = function(index) {
-      if (!setView[index]) {
-        setView[index] = true
-        dirty.update[size] = index
+    this.add = function(value) {
+      if (!setView[value]) {
+        setView[value] = true
+        dirty.update[size] = value
         size += 1
       }
     }
@@ -197,6 +207,10 @@ function Grid(dimX, dimY) {
     return new BufferedArray(length, new Array(length), new Array(length))
   }
 
+  /*
+   * A short-term reusable array, which allows filling before later "consuming",
+   * which simply switches to another array when consumed, which fills, and repeat.
+   */
   function BufferedArray(length, array, buffer) {
     this.apply = array
     this.update = buffer
