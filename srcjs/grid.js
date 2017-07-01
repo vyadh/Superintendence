@@ -11,7 +11,7 @@ function Grid(dimX, dimY) {
 
   var cellCount = dimX * dimY
   var grid = newArray(cellCount, false)
-  var dirty = new Dirty
+  var dirty = new FlipSet(cellCount)
   var changes = new Changes
   /** Array of only the changes required to update the grid. */
   var painting = null
@@ -173,29 +173,6 @@ function Grid(dimX, dimY) {
       changes.flip()
       changes.reset()
       return changes
-    }
-  }
-
-  /*
-   * Simulate a set-like data structure using the buffered array,
-   * only adding changes if they don't exist.
-   */
-  function Dirty() {
-    var setView = new Array(cellCount)
-    var dirty = FlipArray.create(cellCount)
-
-    this.add = function(value) {
-      if (!setView[value]) {
-        setView[value] = true
-        dirty.add(value)
-      }
-    }
-
-    this.consume = function() {
-      setView = new Array(cellCount)
-      dirty.flip()
-      dirty.reset()
-      return dirty
     }
   }
 

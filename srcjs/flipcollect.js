@@ -33,3 +33,28 @@ function FlipArray(read, readSize, write, writeSize) {
 FlipArray.create = function(size) {
   return new FlipArray(new Array(size), 0, new Array(size), 0)
 }
+
+/*
+ * Simulate a set-like data structure using the flip array,
+ * only adding changes if they don't exist.
+ */
+function FlipSet(size) {
+
+  this.setView = new Array(size)
+  this.array = FlipArray.create(size)
+
+  this.add = function(value) {
+    if (!this.setView[value]) {
+      this.setView[value] = true
+      this.array.add(value)
+    }
+  }
+
+  this.consume = function() {
+    this.setView = new Array(size) //todo overhead
+    this.array.flip()
+    this.array.reset()
+    return this.array
+  }
+
+}
