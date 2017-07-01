@@ -11,6 +11,12 @@
 function Trail(size) {
 
   this.data = FlipArray.create(size)
+  this.initialCount = 100
+  this.step = 10
+
+  this.refresh = function(index) {
+    this.add(index, this.initialCount)
+  }
 
   this.add = function(index, count) {
     this.data.add(index << 8 | count & 0xff)
@@ -32,7 +38,7 @@ function Trail(size) {
 
       if (count > 0) {
         decodeFunction(index, count)
-        this.add(index, count - 1)
+        this.add(index, count - this.step)
       }
     }
   }
