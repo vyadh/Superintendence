@@ -78,8 +78,8 @@ function Grid(dimX, dimY) {
   this.step = function() {
     var current = dirty.consume()
 
-    for (var i = 0; i < current.length; i++) {
-      var index = current.apply[i]
+    for (var i = 0; i < current.readSize; i++) {
+      var index = current.read[i]
       var xp = x(index)
       var yp = y(index)
       var before = this.cell(xp, yp)
@@ -159,8 +159,6 @@ function Grid(dimX, dimY) {
    */
   function Changes() {
     var changes = FlipArray.create(cellCount)
-    /* Externalised index management as it is much faster... */
-    var size = 0
 
     this.add = function(index, alive) {
       changes.add(encode(index, alive))
@@ -184,44 +182,20 @@ function Grid(dimX, dimY) {
    */
   function Dirty() {
     var setView = new Array(cellCount)
-    var dirty = newBufferedArray(cellCount)
-    /* Externalised index management as it is much faster... */
-    var size = 0
+    var dirty = FlipArray.create(cellCount)
 
     this.add = function(value) {
       if (!setView[value]) {
         setView[value] = true
-        dirty.update[size] = value
-        size += 1
+        dirty.add(value)
       }
     }
 
     this.consume = function() {
       setView = new Array(cellCount)
-      var res = dirty.take(size)
-      size = 0
-      return res
-    }
-  }
-
-  function newBufferedArray(length) {
-    return new BufferedArray(length, new Array(length), new Array(length))
-  }
-
-  /*
-   * A short-term reusable array, which allows filling before later "consuming",
-   * which simply switches to another array when consumed, which fills, and repeat.
-   */
-  function BufferedArray(length, array, buffer) {
-    this.apply = array
-    this.update = buffer
-    this.length = length
-
-    this.take = function(size) {
-      var t = this.apply
-      this.apply = this.update
-      this.update = t
-      return new BufferedArray(size, this.apply, this.update)
+      dirty.flip()
+      dirty.reset()
+      return dirty
     }
   }
 
