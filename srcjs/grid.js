@@ -59,7 +59,6 @@ function Grid(dimX, dimY) {
 
   function x(i) { return (i % dimX) + 1 }
   function y(i) { return Math.floor(i / dimX) + 1 }
-
   function index(x, y) { return (y - 1) * dimX + (x - 1) }
 
   var mark = function(x, y) {
@@ -155,7 +154,7 @@ function Grid(dimX, dimY) {
 */
 
   /*
-   * A buffered array with additional functionality to encode and decode indices.
+   * A flip array with additional functionality to encode and decode indices.
    */
   function Changes() {
     var changes = FlipArray.create(cellCount)
@@ -164,10 +163,16 @@ function Grid(dimX, dimY) {
       changes.add(encode(index, alive))
     }
 
-    function encode(index, alive) { return alive ? index+cellCount : index }
+    function encode(index, alive) {
+      return alive ? index+cellCount : index
+    }
 
-    this.decodeIndex = function(value) { return (value >= cellCount) ? value-cellCount : value }
-    this.decodeAlive = function(value) { return value >= cellCount }
+    this.decodeIndex = function(value) {
+      return (value >= cellCount) ? value-cellCount : value
+    }
+    this.decodeAlive = function(value) {
+      return value >= cellCount
+    }
 
     this.consume = function() {
       changes.flip()
