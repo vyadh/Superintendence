@@ -14,14 +14,14 @@ function Grid(dimX, dimY) {
   var dirty = new Dirty
   var changes = new Changes
   /** Array of only the changes required to update the grid. */
-  var painting = Array()
+  var painting = null
 
   this.clear = function() {
-   grid = newArray(cellCount, false)
-   dirty.consume()
-   changes.consume()
-   painting = Array()
-   this.draw()
+    grid = newArray(cellCount, false)
+    dirty.consume()
+    changes.consume()
+    painting = null
+    this.draw()
   }
 
   this.tick = function() {
@@ -31,8 +31,8 @@ function Grid(dimX, dimY) {
 
   this.commit = function() {
     var consumed = changes.consume()
-    for (var i=0; i<consumed.length; i++) {
-      var encoded = consumed.apply[i]
+    for (var i=0; i<consumed.readSize; i++) {
+      var encoded = consumed.read[i]
       var index = changes.decodeIndex(encoded)
       var alive = changes.decodeAlive(encoded)
       grid[index] = alive
@@ -118,8 +118,8 @@ function Grid(dimX, dimY) {
   }
 
   this.draw = function(g, scale) {
-    for (var i = 0; i < painting.length; i++) {
-      var encoded = painting.apply[i]
+    for (var i = 0; i < painting.readSize; i++) {
+      var encoded = painting.read[i]
       var index = changes.decodeIndex(encoded)
       var alive = changes.decodeAlive(encoded)
 
@@ -133,7 +133,7 @@ function Grid(dimX, dimY) {
 
       g.fillRect(sx+1, sy+1, scale-1, scale-1)
     }
-    painting = new Array()
+    painting = null
   }
 
   this.count = function() {
@@ -158,12 +158,12 @@ function Grid(dimX, dimY) {
    * A buffered array with additional functionality to encode and decode indices.
    */
   function Changes() {
-    var changes = newBufferedArray(cellCount)
+    var changes = FlipArray.create(cellCount)
+    /* Externalised index management as it is much faster... */
     var size = 0
 
     this.add = function(index, alive) {
-      changes.update[size] = encode(index, alive)
-      size += 1
+      changes.add(encode(index, alive))
     }
 
     function encode(index, alive) { return alive ? index+cellCount : index }
@@ -172,9 +172,9 @@ function Grid(dimX, dimY) {
     this.decodeAlive = function(value) { return value >= cellCount }
 
     this.consume = function() {
-      var res = changes.take(size)
-      size = 0
-      return res
+      changes.flip()
+      changes.reset()
+      return changes
     }
   }
 
@@ -185,6 +185,7 @@ function Grid(dimX, dimY) {
   function Dirty() {
     var setView = new Array(cellCount)
     var dirty = newBufferedArray(cellCount)
+    /* Externalised index management as it is much faster... */
     var size = 0
 
     this.add = function(value) {
