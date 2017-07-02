@@ -26,8 +26,13 @@ function Grid(dimX, dimY) {
     this.draw()
   }
 
-  this.tick = function() {
-    this.step()
+  this.testing = function() {
+    trail.skip = 1
+    trail.optimise = false
+  }
+
+  this.tick = function(clock) {
+    this.step(clock)
     this.commit()
   }
 
@@ -104,7 +109,7 @@ function Grid(dimX, dimY) {
       trail.remove(index)
     }
     // Just died so add or refresh trail
-    else if (!alive) { //todo no need for test
+    else {
       trail.refresh(index)
     }
   }
@@ -135,22 +140,21 @@ function Grid(dimX, dimY) {
     return false
   }
 
-  this.draw = function(g, scale) {
+  this.draw = function(g, scale, clock) {
     // When cell dies, currently draws dead colour, so draw cell change first
     this.drawCells(g, scale)
-    this.drawTrail(g, scale)
+    this.drawTrail(g, scale, clock)
   }
 
-  this.drawTrail = function(g, scale) {
+  this.drawTrail = function(g, scale, clock) {
     if (trailDisabled) {
       return
     }
-    var drawCell = this.drawCell
 
-    trail.tick(function(index, count) {
-      //todo generate colour index?
-      var colour = "rgb(0, 0, " + count + ")"
-      g.fillStyle = colour
+    var drawCell = this.drawCell
+    trail.tick(clock, function(index, count) {
+      // var colour = "rgb(0, 0, " + count + ")"
+      var colour = trail.colours[count]
 
       drawCell(index, colour, g, scale)
     })
@@ -167,7 +171,6 @@ function Grid(dimX, dimY) {
 
       if (drawRequired) {
         var colour = alive ? "rgb(0, 255, 0)" : "rgb(64, 64, 64)"
-        g.fillStyle = colour
         this.drawCell(index, colour, g, scale)
       }
     }
@@ -180,6 +183,7 @@ function Grid(dimX, dimY) {
     var sx = scale * (xp - 1)
     var sy = scale * (yp - 1)
 
+    g.fillStyle = colour
     g.fillRect(sx+1, sy+1, scale-1, scale-1)
   }
 
@@ -231,9 +235,7 @@ function Grid(dimX, dimY) {
 
   function newArray(size, value) {
     var res = new Array(size)
-    for (var i=0; i<size; i++) {
-      res[i] = value
-    }
+    res.fill(value)
     return res
   }
 

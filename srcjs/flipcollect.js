@@ -10,6 +10,14 @@ function FlipArray(read, readSize, write, writeSize) {
   this.read = read
   this.readSize = readSize
 
+  this.size = function() {
+    return this.readSize
+  }
+
+  this.get = function(i) {
+    return this.read[i]
+  }
+
   this.add = function(value) {
     this.write[this.writeSize++] = value
   }
@@ -40,8 +48,16 @@ FlipArray.create = function(size) {
  */
 function FlipSet(size) {
 
-  this.setView = new Array(size)
   this.array = FlipArray.create(size)
+  this.setView = Array(size)
+
+  this.size = function() {
+    return this.array.readSize
+  }
+
+  this.get = function(i) {
+    return this.array.read[i]
+  }
 
   this.add = function(value) {
     if (!this.setView[value]) {
@@ -51,7 +67,7 @@ function FlipSet(size) {
   }
 
   this.consume = function() {
-    this.setView = Array(size) //todo overhead
+    this.setView.fill(false)
     this.array.flip()
     this.array.reset()
     return this.array
@@ -61,11 +77,20 @@ function FlipSet(size) {
 
 /*
  * Simulate a map by keeping an index of the value positions.
+ * Can only be used for positive values.
  */
 function FlipMap(size) {
 
   this.array = FlipArray.create(size)
   this.index = Array(size)
+
+  this.size = function() {
+    return this.array.readSize
+  }
+
+  this.get = function(i) {
+    return this.array.read[i]
+  }
 
   this.put = function(key, value) {
     var index = this.index[key]
@@ -77,13 +102,38 @@ function FlipMap(size) {
     }
   }
 
+  this.remove = function(key) {
+    this.put(key, -1)
+  }
+
   this.flip = function() {
     this.array.flip()
-    this.index = Array(size) //todo overhead
+    this.array.reset()
+    this.index = Array(size)
+  }
+
+  this.flipCompact = function() {
+    // Flip for compaction
+    this.array.flip()
+    this.array.reset()
+
+    // Compact (non-zero values)
+    for (var i=0; i<this.array.readSize; i++) {
+      var value = this.array.read[i]
+      if (value >= 0) {
+        this.array.add(value)
+      }
+    }
+
+    // Flip fror reading compacted version
+    this.array.flip()
+    this.array.reset()
+
+    // Reset index
+    this.index = Array(size)
   }
 
   this.consume = function() {
-    this.setView = Array(size) //todo overhead
     this.array.flip()
     this.array.reset()
     return this.array

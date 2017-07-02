@@ -7,7 +7,8 @@ var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
 var mobile = android || iOS
 
 var dim = mobile ? 10 : 5 // Cell Size
-var fps = mobile ? 20 : 15
+var fps = mobile ? 20 : 20
+var clock = 0 // Increments every frame, allows periodic actions
 
 var c // Canvas
 var g // Graphics Context
@@ -65,9 +66,9 @@ function mainNormal() {
   activate(20, 20, shapes.title())
   drawGrid()
 
-  if (mobile) {
+//  if (mobile) {
     ensureStarted()
-  }
+//  }
 }
 
 function reinit() {
@@ -99,7 +100,7 @@ function random(x, y, alive) {
 }
 
 function drawGrid() {
-  grid.draw(g, dim)
+  grid.draw(g, dim, clock)
 }
 
 
@@ -155,6 +156,7 @@ function showf(f) {
 function tick() {
   grid.tick()
   drawGrid()
+  clock++
 }
 
 function toggle() {

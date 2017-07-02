@@ -2,6 +2,8 @@ var assert = chai.assert;
 
 suite('Grid', function() {
 
+  var clock = 1
+
   suite('activate', function() {
     var grid = new Grid(3, 3)
 
@@ -36,6 +38,7 @@ suite('Grid', function() {
 
     test('grid is drawn with trail after cell dies', function() {
       var grid = new Grid(1, 1)
+      grid.testing()
       var colours = []
       grid.drawCell = function(index, colour, g, scale) {
         colours.push(colour)
@@ -43,12 +46,12 @@ suite('Grid', function() {
 
       grid.activate(1, 1)
       grid.commit()
-      grid.draw(g, 1)
+      grid.draw(g, 1, clock)
 
       grid.tick()
-      grid.draw(g, 1)
+      grid.draw(g, 1, clock)
       grid.tick()
-      grid.draw(g, 1)
+      grid.draw(g, 1, clock)
 
       assert.sameMembers(colours, [alive, trail0, trail1])
     })
@@ -65,15 +68,15 @@ suite('Grid', function() {
       grid.activate(2, 1)
       grid.activate(2, 2)
       grid.commit()
-      grid.draw(g, 1)
+      grid.draw(g, 1, clock)
 
       grid.tick()
-      grid.draw(g, 1)
+      grid.draw(g, 1, clock)
       // Will cause no changes
       grid.tick()
-      grid.draw(g, 1)
+      grid.draw(g, 1, clock)
       grid.tick()
-      grid.draw(g, 1)
+      grid.draw(g, 1, clock)
 
       assert.sameMembers(colours, [0+alive, 1+alive, 2+alive, 3+alive])
     })
@@ -90,12 +93,12 @@ suite('Grid', function() {
       grid.activate(2, 2)
       grid.activate(3, 2)
       grid.commit()
-      grid.draw(g, 1)
+      grid.draw(g, 1, clock)
       colours = []
 
       // Blinker state: |
       grid.tick()
-      grid.draw(g, 1)
+      grid.draw(g, 1, clock)
 
       // Note, only draws differences, no need to redraw (2,2)
       assert.sameMembers(colours, [

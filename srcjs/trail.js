@@ -13,6 +13,14 @@ function Trail(size) {
   this.data = new FlipMap(size)
   this.initialCount = 250
   this.step = 10
+  this.skip = 3
+  this.colours = Array(this.initialCount)
+  this.optimise = true
+
+  // Pre-generate colours for each count
+  for (var count=this.initialCount; count>=0; count-=this.step) {
+    this.colours[count] = "rgb(0, 0, " + count + ")"
+  }
 
   this.refresh = function(index) {
     this.put(index, this.initialCount)
@@ -32,20 +40,36 @@ function Trail(size) {
    * values for the next decode, where the count has been decremented. Counts
    * at zero or less are not propagated to the next decode.
    */
-  this.tick = function(decodeFunction) {
+  this.tick = function(clock, decodeFunction) {
     this.data.flip()
-    this.data.array.reset()
 
-    for (var i = 0; i < this.data.array.readSize; i++) {
-      var encoded = this.data.array.read[i]
+    for (var i = 0; i < this.data.size(); i++) {
+      var encoded = this.data.get(i)
       var index = encoded >>> 8
       var count = encoded & 0xff
 
+      // Only positive counts are propogated, compacting the map
       if (count > 0) {
-        decodeFunction(index, count)
-        this.put(index, count - this.step)
+
+        // Optimise away the very dark colours
+        if (count < 50 && this.optimise) {
+          count = this.step
+        }
+
+        if (this.isDecode(clock, count)) {
+          decodeFunction(index, count)
+          this.put(index, count - this.step)
+        } else {
+          // Need to maintain existing value
+          this.put(index, count)
+        }
       }
     }
+  }
+
+  /* Always update on cell death, then update in increments */
+  this.isDecode = function(clock, count) {
+    return count === this.initialCount || clock % this.skip === 0
   }
 
 }

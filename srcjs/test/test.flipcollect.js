@@ -114,6 +114,19 @@ suite('Flip Collections', function() {
       assert.equal(map.array.writeSize, 3)
     })
 
+    test('removing value sets it to zero (sentinal)', function() {
+      var map = new FlipMap(10)
+      map.put(6, 1)
+      map.put(5, 2)
+      map.put(4, 3)
+
+      map.remove(5)
+
+      assert.equal(map.array.write[map.index[6]], 1)
+      assert.equal(map.array.write[map.index[5]], -1)
+      assert.equal(map.array.write[map.index[4]], 3)
+    })
+
   })
 
 });

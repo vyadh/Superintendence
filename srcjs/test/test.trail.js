@@ -2,10 +2,13 @@ var assert = chai.assert;
 
 suite('Trail', function() {
 
+  var clock = 0
+
   suite('mutatation', function() {
 
     test('added encoded items can be decoded', function() {
       var trail = new Trail(10)
+      trail.optimise = false
       trail.put(8, 5)
       trail.put(12345, 255)
 
@@ -16,7 +19,7 @@ suite('Trail', function() {
         count.push(cnt)
       }
 
-      trail.tick(decode)
+      trail.tick(clock, decode)
 
       assert.deepEqual(index, [8, 12345])
       assert.deepEqual(count, [5, 255])
@@ -34,7 +37,7 @@ suite('Trail', function() {
         count.push(cnt)
       }
 
-      trail.tick(decode)
+      trail.tick(clock, decode)
 
       assert.deepEqual(index, [1, 2])
       assert.deepEqual(count, [trail.initialCount, trail.initialCount])
@@ -54,7 +57,7 @@ suite('Trail', function() {
         count.push(cnt)
       }
 
-      trail.tick(decode)
+      trail.tick(clock, decode)
 
       assert.deepEqual(index, [1, 3])
       assert.deepEqual(count, [trail.initialCount, trail.initialCount])
@@ -66,6 +69,7 @@ suite('Trail', function() {
 
     test('count is decremented when using tick', function() {
       var trail = new Trail(10)
+      trail.optimise = false
       trail.step = 1
       trail.put(10, 4)
       trail.put(11, 2)
@@ -86,8 +90,8 @@ suite('Trail', function() {
       ]
 
       for (var i=0; i<expected.length; i++) {
-        var count = []
-        trail.tick(decode)
+        count = []
+        trail.tick(clock, decode)
         assert.deepEqual(count, expected[i])
       }
     })
