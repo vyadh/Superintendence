@@ -1,8 +1,8 @@
 var assert = chai.assert;
 
-suite('FlipArray', function() {
+suite('Flip Collections', function() {
 
-  suite('activate', function() {
+  suite('array', function() {
 
     test('adding element', function() {
       var array = FlipArray.create(10)
@@ -56,6 +56,25 @@ suite('FlipArray', function() {
       assert.equal(array.write[0], 10)
       assert.equal(array.write[1], 20)
       assert.equal(array.writeSize, 0)
+    })
+
+  })
+
+  suite('set', function() {
+
+    test('only add items once', function() {
+      var set = new FlipSet(10)
+
+      set.add(1)
+      set.add(2)
+      set.add(2)
+      set.add(3)
+      set.add(3)
+
+      assert.equal(set.array.writeSize, 3)
+      assert.equal(set.array.write[0], 1)
+      assert.equal(set.array.write[1], 2)
+      assert.equal(set.array.write[2], 3)
     })
 
   })
