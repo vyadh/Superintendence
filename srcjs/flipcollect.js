@@ -118,8 +118,8 @@ function FlipMap(size) {
     this.array.reset()
 
     // Compact (non-zero values)
-    for (var i=0; i<this.array.readSize; i++) {
-      var value = this.array.read[i]
+    for (var i=0; i<this.array.size(); i++) {
+      var value = this.array.get(i)
       if (value >= 0) {
         this.array.add(value)
       }

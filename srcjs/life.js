@@ -1,6 +1,6 @@
 window.onload = main
 
-var BENCH = false
+var BENCH = true
 
 var android = navigator.userAgent.toLowerCase().indexOf("android") > -1;
 var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
@@ -310,6 +310,7 @@ function screenPointToGrid(point) {
 // Year 2017
 //  ~60: Chrome 59 @ 200 iterations (!)
 // 3900: Chrome 59 @ 5000 iterations
+// 9500: Chrome 59 / Trails
 
 function benchmark(iterations, f) {
   var i = iterations
