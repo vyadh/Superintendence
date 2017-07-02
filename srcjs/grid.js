@@ -13,6 +13,7 @@ function Grid(dimX, dimY) {
   var grid = newArray(cellCount, false)
   var dirty = new FlipSet(cellCount)
   var changes = new Changes
+  var trail = new Trail(cellCount)
   /** Array of only the changes required to update the grid. */
   var painting = null
 
@@ -86,7 +87,21 @@ function Grid(dimX, dimY) {
       var after = this.alive(before, n)
       if (before !== after) {
         this.prime(xp, yp, after)
+        this.updateTrailOnChange(index, after)
       }
+    }
+  }
+
+  //todo wrong time to update? In read phase
+  /* If a cell has changed, we need to update the trail data. */
+  this.updateTrailOnChange = function(index, alive) {
+    // Just born, so remove from trail
+    if (alive) {
+      trail.remove(index)
+    }
+    // Just died so add or refresh trail
+    else if (!alive) { //todo no need for test
+      trail.refresh(index)
     }
   }
 
@@ -117,22 +132,47 @@ function Grid(dimX, dimY) {
   }
 
   this.draw = function(g, scale) {
+    // When cell dies, currently draws dead colour, so draw cell change first
+    this.drawCells(g, scale)
+    this.drawTrail(g, scale)
+  }
+
+  this.drawTrail = function(g, scale) {
+    var drawCell = this.drawCell
+
+    trail.tick(function(index, count) {
+      //todo generate colour index?
+      var colour = "rgb(0, 0, " + count + ")"
+      g.fillStyle = colour
+
+      drawCell(index, colour, g, scale)
+    })
+  }
+
+  this.drawCells = function(g, scale) {
     for (var i = 0; i < painting.readSize; i++) {
       var encoded = painting.read[i]
       var index = changes.decodeIndex(encoded)
       var alive = changes.decodeAlive(encoded)
 
-      var colour = alive ? "rgb( 0, 255,  0)" : "rgb(64,  64, 64)"
+      // todo If it's died, it will have a trail, so do not need to reset
+      var colour = alive ? "rgb(0, 255, 0)" : "rgb(64, 64, 64)"
       g.fillStyle = colour
 
-      var xp = x(index)
-      var yp = y(index)
-      var sx = scale * (xp - 1)
-      var sy = scale * (yp - 1)
-
-      g.fillRect(sx+1, sy+1, scale-1, scale-1)
+      // if (alive) {
+        this.drawCell(index, colour, g, scale)
+      // }
     }
     painting = null
+  }
+
+  this.drawCell = function(index, colour, g, scale) {
+    var xp = x(index)
+    var yp = y(index)
+    var sx = scale * (xp - 1)
+    var sy = scale * (yp - 1)
+
+    g.fillRect(sx+1, sy+1, scale-1, scale-1)
   }
 
   this.count = function() {

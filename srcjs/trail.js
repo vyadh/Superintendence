@@ -11,7 +11,7 @@
 function Trail(size) {
 
   this.data = FlipArray.create(size)
-  this.initialCount = 100
+  this.initialCount = 250
   this.step = 10
 
   this.refresh = function(index) {
@@ -20,6 +20,23 @@ function Trail(size) {
 
   this.add = function(index, count) {
     this.data.add(index << 8 | count & 0xff)
+  }
+
+  this.remove = function(index) {
+    // this.put(index, 0)
+    // todo nasty hack until we have map-like put
+    var size = this.data.writeSize
+    var arr = []
+    for (var i=0; i<size; i++) {
+      var value = this.data.write[i]
+      var valueIndex = value >> 8
+      if (index === valueIndex) {
+        this.data.writeSize--
+      } else {
+        arr.push(value)
+      }
+    }
+    this.data.write = arr
   }
 
   /*

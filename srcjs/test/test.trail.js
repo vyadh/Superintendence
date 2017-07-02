@@ -2,7 +2,7 @@ var assert = chai.assert;
 
 suite('Trail', function() {
 
-  suite('update (add/refresh)', function() {
+  suite('mutatation', function() {
 
     test('added encoded items can be decoded', function() {
       var trail = new Trail(10)
@@ -37,7 +37,27 @@ suite('Trail', function() {
       trail.tick(decode)
 
       assert.deepEqual(index, [1, 2])
-      assert.deepEqual(count, [100, 100])
+      assert.deepEqual(count, [trail.initialCount, trail.initialCount])
+    })
+
+    test('removing a cell zeros count', function() {
+      var trail = new Trail(10)
+      trail.refresh(1)
+      trail.refresh(2)
+      trail.refresh(3)
+      trail.remove(2)
+
+      var index = []
+      var count = []
+      function decode(idx, cnt) {
+        index.push(idx)
+        count.push(cnt)
+      }
+
+      trail.tick(decode)
+
+      assert.deepEqual(index, [1, 3])
+      assert.deepEqual(count, [trail.initialCount, trail.initialCount])
     })
 
   })
