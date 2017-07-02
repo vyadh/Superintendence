@@ -10,33 +10,21 @@
  */
 function Trail(size) {
 
-  this.data = FlipArray.create(size)
+  this.data = new FlipMap(size)
   this.initialCount = 250
   this.step = 10
 
   this.refresh = function(index) {
-    this.add(index, this.initialCount)
+    this.put(index, this.initialCount)
   }
 
-  this.add = function(index, count) {
-    this.data.add(index << 8 | count & 0xff)
+  this.put = function(index, count) {
+    this.data.put(index, index << 8 | count & 0xff)
   }
 
+  /* For efficiency, mark count as zero on removal. */
   this.remove = function(index) {
-    // this.put(index, 0)
-    // todo nasty hack until we have map-like put
-    var size = this.data.writeSize
-    var arr = []
-    for (var i=0; i<size; i++) {
-      var value = this.data.write[i]
-      var valueIndex = value >> 8
-      if (index === valueIndex) {
-        this.data.writeSize--
-      } else {
-        arr.push(value)
-      }
-    }
-    this.data.write = arr
+    this.put(index, 0)
   }
 
   /*
@@ -46,16 +34,16 @@ function Trail(size) {
    */
   this.tick = function(decodeFunction) {
     this.data.flip()
-    this.data.reset()
+    this.data.array.reset()
 
-    for (var i = 0; i < this.data.readSize; i++) {
-      var encoded = this.data.read[i]
+    for (var i = 0; i < this.data.array.readSize; i++) {
+      var encoded = this.data.array.read[i]
       var index = encoded >>> 8
       var count = encoded & 0xff
 
       if (count > 0) {
         decodeFunction(index, count)
-        this.add(index, count - this.step)
+        this.put(index, count - this.step)
       }
     }
   }

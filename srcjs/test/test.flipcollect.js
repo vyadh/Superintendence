@@ -79,4 +79,41 @@ suite('Flip Collections', function() {
 
   })
 
+  suite('map', function() {
+
+    test('put updates index and data', function() {
+      var map = new FlipMap(10)
+
+      map.put(5, 42)
+      map.put(6, 24)
+
+      assert.equal(map.index[5], 0)
+      assert.equal(map.array.write[0], 42)
+      assert.equal(map.index[6], 1)
+      assert.equal(map.array.write[1], 24)
+
+      assert.equal(map.array.writeSize, 2)
+    })
+
+    test('put existing value replaces rather than appends', function() {
+      var map = new FlipMap(10)
+
+      map.put(5, 0)
+      map.put(4, 42)
+      map.put(4, 24)
+      map.put(3, 0)
+
+      assert.equal(map.array.write[0], 0)
+      assert.equal(map.array.write[1], 24)
+      assert.equal(map.array.write[2], 0)
+
+      assert.equal(map.index[5], 0)
+      assert.equal(map.index[4], 1)
+      assert.equal(map.index[3], 2)
+
+      assert.equal(map.array.writeSize, 3)
+    })
+
+  })
+
 });

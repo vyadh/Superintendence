@@ -31,7 +31,7 @@ function FlipArray(read, readSize, write, writeSize) {
 }
 
 FlipArray.create = function(size) {
-  return new FlipArray(new Array(size), 0, new Array(size), 0)
+  return new FlipArray(Array(size), 0, Array(size), 0)
 }
 
 /*
@@ -51,7 +51,39 @@ function FlipSet(size) {
   }
 
   this.consume = function() {
-    this.setView = new Array(size) //todo overhead
+    this.setView = Array(size) //todo overhead
+    this.array.flip()
+    this.array.reset()
+    return this.array
+  }
+
+}
+
+/*
+ * Simulate a map by keeping an index of the value positions.
+ */
+function FlipMap(size) {
+
+  this.array = FlipArray.create(size)
+  this.index = Array(size)
+
+  this.put = function(key, value) {
+    var index = this.index[key]
+    if (typeof index == 'undefined') {
+      this.index[key] = this.array.writeSize
+      this.array.add(value)
+    } else {
+      this.array.write[index] = value
+    }
+  }
+
+  this.flip = function() {
+    this.array.flip()
+    this.index = Array(size) //todo overhead
+  }
+
+  this.consume = function() {
+    this.setView = Array(size) //todo overhead
     this.array.flip()
     this.array.reset()
     return this.array

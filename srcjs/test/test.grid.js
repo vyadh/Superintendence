@@ -31,7 +31,6 @@ suite('Grid', function() {
   suite('trail', function() {
     var g = function() { }
     var alive = 'rgb(0, 255, 0)'
-    var dead = 'rgb(64, 64, 64)'
     var trail0 = 'rgb(0, 0, 250)'
     var trail1 = 'rgb(0, 0, 240)'
 
@@ -47,11 +46,11 @@ suite('Grid', function() {
       grid.draw(g, 1)
 
       grid.tick()
-      grid.draw(g, 1)// dead + trail0
+      grid.draw(g, 1)
       grid.tick()
       grid.draw(g, 1)
 
-      assert.sameMembers(colours, [alive, dead, trail0, trail1])
+      assert.sameMembers(colours, [alive, trail0, trail1])
     })
 
     test('grid with cell alive stays green', function() {
@@ -102,9 +101,7 @@ suite('Grid', function() {
       assert.sameMembers(colours, [
         1+alive, // (2,1)
         7+alive, // (2,3)
-        3+dead,  // (1,2)
         3+trail0,  // (1,2)
-        5+dead,  // (3,2)
         5+trail0,  // (3,2)
       ])
     })

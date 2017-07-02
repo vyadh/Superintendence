@@ -14,6 +14,7 @@ function Grid(dimX, dimY) {
   var dirty = new FlipSet(cellCount)
   var changes = new Changes
   var trail = new Trail(cellCount)
+  var trailDisabled = false
   /** Array of only the changes required to update the grid. */
   var painting = null
 
@@ -92,9 +93,12 @@ function Grid(dimX, dimY) {
     }
   }
 
-  //todo wrong time to update? In read phase
   /* If a cell has changed, we need to update the trail data. */
   this.updateTrailOnChange = function(index, alive) {
+    if (trailDisabled) {
+      return
+    }
+
     // Just born, so remove from trail
     if (alive) {
       trail.remove(index)
@@ -138,6 +142,9 @@ function Grid(dimX, dimY) {
   }
 
   this.drawTrail = function(g, scale) {
+    if (trailDisabled) {
+      return
+    }
     var drawCell = this.drawCell
 
     trail.tick(function(index, count) {
@@ -155,13 +162,14 @@ function Grid(dimX, dimY) {
       var index = changes.decodeIndex(encoded)
       var alive = changes.decodeAlive(encoded)
 
-      // todo If it's died, it will have a trail, so do not need to reset
-      var colour = alive ? "rgb(0, 255, 0)" : "rgb(64, 64, 64)"
-      g.fillStyle = colour
+      // If it's died, it will have a trail, so do not need to reset
+      var drawRequired = trailDisabled || alive
 
-      // if (alive) {
+      if (drawRequired) {
+        var colour = alive ? "rgb(0, 255, 0)" : "rgb(64, 64, 64)"
+        g.fillStyle = colour
         this.drawCell(index, colour, g, scale)
-      // }
+      }
     }
     painting = null
   }

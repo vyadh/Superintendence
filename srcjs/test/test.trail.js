@@ -6,8 +6,8 @@ suite('Trail', function() {
 
     test('added encoded items can be decoded', function() {
       var trail = new Trail(10)
-      trail.add(8, 5)
-      trail.add(12345, 255)
+      trail.put(8, 5)
+      trail.put(12345, 255)
 
       var index = []
       var count = []
@@ -67,9 +67,9 @@ suite('Trail', function() {
     test('count is decremented when using tick', function() {
       var trail = new Trail(10)
       trail.step = 1
-      trail.add(10, 4)
-      trail.add(11, 2)
-      trail.add(12, 3)
+      trail.put(10, 4)
+      trail.put(11, 2)
+      trail.put(12, 3)
 
       var count = []
       function decode(idx, cnt) {
