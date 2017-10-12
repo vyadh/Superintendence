@@ -1,13 +1,13 @@
 window.onload = main
 
-var BENCH = true
+var BENCH = false
 
 var android = navigator.userAgent.toLowerCase().indexOf("android") > -1;
 var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
 var mobile = android || iOS
 
-var dim = mobile ? 10 : 5 // Cell Size
-var fps = mobile ? 20 : 20
+var dim = mobile ? 8 : 5 // Cell Size
+var fps = mobile ? 25 : 20
 var clock = 0 // Increments every frame, allows periodic actions
 
 var c // Canvas
