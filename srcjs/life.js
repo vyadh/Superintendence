@@ -65,6 +65,8 @@ function mainNormal() {
 
   activate(20, 20, shapes.title())
   drawGrid()
+  activate(200, 100, shapes.glider(Direction.NW))
+  drawGrid()
 
 //  if (mobile) {
     ensureStarted()
